@@ -1,23 +1,30 @@
+/*
+ *  COMP 426 - Fall 2018
+ *  Object model for Player
+ *
+ */
+
 var Player = function (name, budget) {
   this.name = name,
   this.budget = budget,
-  this.active = true
-  this.player_id = name.hashCode();
-  this.hand = [];  // best way to initalize this?
+  this.active = true,
+  this.player_id = name.hashCode(),
+  this.hand = []  // best way to initalize this?
 }
-
+// name and id
+Player.prototype.getName = function() { return this.name; }
+Player.prototype.getId = function() { return this.player_id; }
+// active
 Player.prototype.deactivate = function() { this.active = false; }
 Player.prototype.activate = function() { this.active = true; }
-
-Player.prototype.addBudget(winnings) { this.budget += winnings; }
-Player.prototype.subBudget(losings) { this.budget += -losings; }
-Player.prototype.getBudget() { return this.budget; }
-Player.prototype.setBudget(amount) { this.budget = amount; }
-
-Player.prototype.getId() { return this.player_id; }
-
-Player.prototype.getHand() { return this.hand; }
-Player.prototype.addCard(card) {
+// budget
+Player.prototype.addBudget = function(winnings) { this.budget += winnings; }
+Player.prototype.subBudget = function(losings) { this.budget += -losings; }
+Player.prototype.getBudget = function() { return this.budget; }
+Player.prototype.setBudget = function(amount) { this.budget = amount; }
+// hand
+Player.prototype.getHand = function() { return this.hand; }
+Player.prototype.addCard = function(card) {
   if(this.hand.length > 2) {
     return false;
   } else {
@@ -25,7 +32,7 @@ Player.prototype.addCard(card) {
     return true;
   }
 }
-
+// helpers
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
   if (this.length === 0) return hash;
