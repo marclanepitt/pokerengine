@@ -12,8 +12,11 @@
  *  BetEndedEvent
  *  RoundStartedEvent
  *  RoundEndedEvent
+ *  TurnStartedEvent
+ *  TurnEndedEvent
  *
  * Functions:
+ *  startRound
  *  newTurn
  *  newBet
  *  raise
