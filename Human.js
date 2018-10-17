@@ -1,23 +1,24 @@
 var Human = function (name) {
-    var player = new Player(name);
-    
-    var match = null;
-    var current_round = null;
-    var player_id = null;
+  var player = new Player(name);
 
-    this.setupMatch = function (poker_match) {
-	match = poker_match;
-    }
+  var match = null;
+  var current_round = null;
+  var player_id = null;
 
-    this.getName = function () {
-	return name;
-    }
+  this.setupMatch = function (poker_match) {
+    match = poker_match;
+  }
 
-    this.setupNextRound = function (round_of_poker, id) {
-	current_round = round_of_poker;
-	player_id = id;
-	current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
-	   console.log(e);
-	});
-    }
+  this.getName = function () {
+    return name;
+  }
+  this.setupNextRound = function (round_of_poker, id) {
+    current_round = round_of_poker;
+    player_id = id;
+    console.log(current_round);
+    current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
+      console.log("inside human start");
+      console.log(e);
+    });
+  }
 }

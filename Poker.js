@@ -40,9 +40,6 @@ var Poker = {
 
 var RoundOfPoker = function (smallBlind, dealer, players) {
 
-
-
-
   var current_turn = 0;
   var flipped_cards = [];
   var bet_index = 0;
@@ -56,6 +53,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   var registeredEventHandlers = {};
 
   this.registerEventHandler = function(type, handler) {
+    console.log(handler);
 		if (registeredEventHandlers[type] == null) {
 			registeredEventHandlers[type] = [];
 		}
