@@ -15,6 +15,7 @@ Player.prototype.getId = function() { return this.player_id; }
 // active
 Player.prototype.deactivate = function() { this.active = false; }
 Player.prototype.activate = function() { this.active = true; }
+Player.prototype.getActiveStatus = function() { return this.active; }
 // budget
 Player.prototype.addBudget = function(winnings) { this.budget += winnings; }
 Player.prototype.subBudget = function(losings) { this.budget += -losings; }

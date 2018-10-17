@@ -47,7 +47,7 @@ var PokerMatch = function (players, settings) {
             callback(next_round);
         });
         
-        next_round.registerEventHandler(Poker.ROUND_OVER_EVENT, round_end_handler);
+        next_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, round_end_handler);
         
         for(var i = 0; i < that.players.length; i++) {
             that.players[i].setupNextRound(next_round, that.players[i].player_id);
