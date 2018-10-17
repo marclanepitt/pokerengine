@@ -56,6 +56,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   var registeredEventHandlers = {};
 
   this.registerEventHandler = function(type, handler) {
+    console.log(handler);
 		if (registeredEventHandlers[type] == null) {
 			registeredEventHandlers[type] = [];
 		}
@@ -115,11 +116,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       }
     }
   }
-  console.log(registeredEventHandlers)
-
-  dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
 
   this.startRound = function() {
+	  dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
+
     // need pre-flop logic
     // get deck
     // shuffle deck

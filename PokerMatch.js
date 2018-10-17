@@ -12,7 +12,7 @@ var PokerMatch = function (players, settings) {
 
     for(var i = 0; i < players.length; i++) {
         players[i].budget = this.settings.startingBudget;
-        players[i].id = i;
+        players[i].player_id = i;
     }
 
     var smallBlind = 1;
