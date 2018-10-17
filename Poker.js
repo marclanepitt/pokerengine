@@ -28,6 +28,8 @@
 
 var Poker = {
 
+  FINISHED: -2,
+
   // Game event types
   ALL_EVENTS : -1,
   ROUND_STARTED_EVENT : 0,
@@ -40,12 +42,14 @@ var Poker = {
 
 var RoundOfPoker = function (smallBlind, dealer, players) {
 
-
-
+  this.players = players;
+  this.dealer = dealer;
 
   var current_turn = 0;
   var flipped_cards = [];
   var bet_index = 0;
+
+  var status = 0;
 
   var pot = {
     total: 0,
@@ -56,7 +60,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   var registeredEventHandlers = {};
 
   this.registerEventHandler = function(type, handler) {
-    console.log(handler);
 		if (registeredEventHandlers[type] == null) {
 			registeredEventHandlers[type] = [];
 		}
@@ -76,14 +79,15 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
       // If the game is over, don't generate events.
       if (that.status == Poker.FINISHED) {
+        console.log("hi");
         return;
       }
 
       // If this is the game over event, update the
       // game status to be FINISHED and calculate
       // final scores
-      if (e.event_type == Hearts.GAME_OVER_EVENT) {
-        that.status = Hearts.FINISHED;
+      if (e.event_type == Poker.GAME_OVER_EVENT) {
+        that.status = Poker.FINISHED;
       }
 
       // A bit of a hack to add a game property
@@ -101,7 +105,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       }
 
       // Call all handlers registered for ALL_EVENTS
-      handlers = registeredEventHandlers[Hearts.ALL_EVENTS];
+      handlers = registeredEventHandlers[Poker.ALL_EVENTS];
+
       if (handlers != null) {
         handlers.forEach(function (h) {
           var e_clone = $.extend(true, {}, e);
@@ -145,8 +150,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   this.newBet = function() {
-    dispatchEvent(new BetStartedEvent(dealer, players, that.bet_index));
-    that.bet_index++;
+    dispatchEvent(new BetStartedEvent(that.dealer, that.players, bet_index));
+    bet_index++;
   }
 
   this.raise = function(bet_amount, player_id) {
@@ -168,7 +173,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   this.fold = function(player_id) {
     //deactivate player
-    that.players[player_id].deactivate();
+    console.log(that.players[player_id])
+    that.players[player_id].player.deactivate();
     dispatchEvent(new BetEndedEvent("fold", -1, player_id));
   }
 
@@ -201,7 +207,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 var BetStartedEvent = function(dealer, players, bet_index) {
 	this.event_type = Poker.BET_START_EVENT;
 	this.getBetter = function() {
-		return (dealer+bet_index+1)%players.length;
+		return players[(dealer.player_id+bet_index+1)%players.length];
 	}
 }
 

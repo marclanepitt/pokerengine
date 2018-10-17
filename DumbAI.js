@@ -1,5 +1,5 @@
 var DumbAI = function (name) {
-	var player = new Player(name);
+    this.player = new Player(name);
 
     var match = null;
     var current_round = null;

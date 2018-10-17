@@ -4,14 +4,17 @@
  *
  */
 
-var Player = function (name) {
+var Player = function (name, budget) {
   this.name = name,
+  this.budget = budget,
   this.active = true,
+  this.player_id = name.hashCode(),
   this.hand = []  // best way to initalize this?
 }
 // name and id
 Player.prototype.getName = function() { return this.name; }
 Player.prototype.getId = function() { return this.player_id; }
+Player.prototype.setId = function() { return this.player_id; }
 // active
 Player.prototype.deactivate = function() { this.active = false; }
 Player.prototype.activate = function() { this.active = true; }
@@ -32,3 +35,13 @@ Player.prototype.addCard = function(card) {
   }
 }
 // helpers
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
