@@ -4,11 +4,9 @@
  *
  */
 
-var Player = function (name, budget) {
+var Player = function (name) {
   this.name = name,
-  this.budget = budget,
   this.active = true,
-  this.player_id = name.hashCode(),
   this.hand = []  // best way to initalize this?
 }
 // name and id
@@ -33,13 +31,3 @@ Player.prototype.addCard = function(card) {
   }
 }
 // helpers
-String.prototype.hashCode = function() {
-  var hash = 0, i, chr;
-  if (this.length === 0) return hash;
-  for (i = 0; i < this.length; i++) {
-    chr   = this.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};

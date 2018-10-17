@@ -23,11 +23,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
 	dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
 
-	var current_turn = 0;
-	var flipped_cards = [];
-	var bet_index = 0;
-
-	var pot = {
+	this.current_turn = 0;
+	this.flipped_cards = [];
+	this.bet_index = 0;
+	this.pot = {
 		total: 0,
 		highBid: 0,
 		highBidder: null
@@ -116,24 +115,33 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 		} else {
 			that.pot.highBid = bet_amount;
 			that.pot.highBidder = player_id;
-			//subtract players money
+			
+			getPlayerById[player_id].subBudget(bet_amount);
+
 			dispatchEvent(new BetEndedEvent("bet", bet_amount, player_id));
+			
+			that.newBet();
 		}
 	}
 
 	this.fold = function(player_id) {
-		//deactivate player
+		getPlayerById[player_id].active = false;
 		dispatchEvent(new BetEndedEvent("fold", -1, player_id));
+		that.newBet();
 	}
 
 	this.check = function(player_id) {
 		//make sure they can check
 		dispatchEvent(new BetEndedEvent("check", 0, player_id));
+		
+		that.newBet();
 	}
 
 	this.call = function(player_id) {
 		//make sure they can call
 		dispatchEvent(new BetEndedEvent("call", that.pot.highBid, player_id));
+		
+		that.newBet();
 	}
 	
 	var BetStartedEvent = function(dealer, players) {
@@ -171,6 +179,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 	}
 
 	var RoundEndedEvent = function() {
+		this.getWinner = function() {
+
+		}
 
 	}
 
@@ -193,5 +204,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
 	var TurnEndedEvent = function() {
 
+	}
+
+	this.getPlayerById = function(id) {
+		return that.players[id];
 	}
 }
