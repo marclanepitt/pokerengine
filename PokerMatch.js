@@ -37,7 +37,7 @@ var PokerMatch = function (players, settings) {
   }
 
   var setup_next_round = function (e) {
-    if(roundCount % 5 === 0) {
+    if(roundCount % 3 === 0) {
       smallBlind = smallBlind * 2;
     }
     var dealer = that.players[roundCount % that.players.length];

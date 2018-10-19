@@ -9,8 +9,14 @@ var Player = function (name, budget) {
   this.budget = budget,
   this.active = true,
   this.player_id = name.hashCode(),
-  this.hand = []  // best way to initalize this?
+  this.hand = [],  // best way to initalize this?
+  this.hasNotBet = true;
 }
+
+Player.prototype.resetHasBet = function() { this.hasNotBet = true; }
+Player.prototype.hasBet = function() { this.hasNotBet = false; }
+Player.prototype.canBet = function() { return this.hasNotBet; }
+
 // name and id
 Player.prototype.getName = function() { return this.name; }
 Player.prototype.getId = function() { return this.player_id; }

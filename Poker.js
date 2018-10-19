@@ -1,30 +1,30 @@
 /* Game of Hearts model object. */
 
 /*
- * OBJECTS:
- * Poker
- * RoundOfPoker
- * -pot
- *
- * Events:
- *  startRound
- *  BetStartedEvent
- *  BetEndedEvent
- *  RoundStartedEvent
- *  RoundEndedEvent
- *  TurnStartedEvent
- *  TurnEndedEvent
- *
- * Functions:
- *  startRound
- *  newTurn
- *  newBet
- *  raise
- *  fold
- *  check
- *  call
- *
- */
+* OBJECTS:
+* Poker
+* RoundOfPoker
+* -pot
+*
+* Events:
+*  startRound
+*  BetStartedEvent
+*  BetEndedEvent
+*  RoundStartedEvent
+*  RoundEndedEvent
+*  TurnStartedEvent
+*  TurnEndedEvent
+*
+* Functions:
+*  startRound
+*  newTurn
+*  newBet
+*  raise
+*  fold
+*  check
+*  call
+*
+*/
 
 var Poker = {
 
@@ -59,7 +59,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var bet_index = 3;
   var current_better = {};
-  
+
   var bet_actions = {  //reset every turn
     numChecks: 0,
     numCalls: 0
@@ -76,11 +76,11 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   var registeredEventHandlers = {};
 
   this.registerEventHandler = function(type, handler) {
-		if (registeredEventHandlers[type] == null) {
-			registeredEventHandlers[type] = [];
-		}
-		registeredEventHandlers[type].push(handler);
-	};
+    if (registeredEventHandlers[type] == null) {
+      registeredEventHandlers[type] = [];
+    }
+    registeredEventHandlers[type].push(handler);
+  };
 
   var that = this;
 
@@ -92,10 +92,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatch_queue.push(e);
     } else {
       dispatching = true;
-
       // If the game is over, don't generate events.
       if (that.status == Poker.FINISHED) {
-        console.log("hi");
         return;
       }
 
@@ -129,7 +127,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
           h(e_clone);
         });
       }
-
       dispatching = false;
       if (dispatch_queue.length > 0) {
         var next_to_dispatch = (dispatch_queue.splice(0, 1))[0];
@@ -142,7 +139,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     setTimeout(() => {
       bet_actions.numChecks = 0;
       bet_actions.numCalls = 0;
-    
+      for(var i = 0; i < players.length; i++) {
+        that.players[i].actions.resetHasBet();
+      }
+
       current_turn++;
       if(current_turn != 1) {
         bet_index = 1;
@@ -161,7 +161,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var newBet = function() {
     setTimeout(() => {
-          //add bet logic
+      //add bet logic
       var dealer_index = activePlayers.indexOf(that.dealer.player_id)
       current_better = players[activePlayers[(dealer_index+bet_index)%activePlayers.length]];
       dispatchEvent(new BetStartedEvent(current_better));
@@ -174,7 +174,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   this.startRound = function() {
-	  dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
+    dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
 
     // need pre-flop logic
     // get deck
@@ -184,7 +184,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     // pay blind
     // bet starting with player left of big blind
     // !!! must be able to pass dealer position to bet
-	  return newTurn();
+    return newTurn();
   }
 
   this.raise = function(bet_amount, player_id) {
@@ -202,8 +202,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       current_better.actions.subBudget(bet_amount);
       dispatchEvent(new BetEndedEvent("bet", bet_amount, player_id));
       return newBet();
-    }
-    else if(bet_amount <= that.pot.highBid) {
+    } else if(bet_amount <= that.pot.highBid) {
       dispatchEvent(new Error("Bet does not exceed current highest bid"));
     } else {
       that.pot.highBid = bet_amount;
@@ -223,7 +222,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
 
     activePlayers.splice(activePlayers.indexOf(player_id),1); //out of round not game
-    
+
     dispatchEvent(new BetEndedEvent("fold", -1, player_id));
     return newBet();
   }
@@ -233,7 +232,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;
     }
-
     if(bet_actions.numChecks === activePlayers.length) {
       dispatchEvent(new TurnEndedEvent());
       return newTurn();
@@ -248,29 +246,28 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(!isBetter(player_id)) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;
-    } 
-
-    bet_actions.numCalls++;
-
-
-    if(current_better.actions.getBudget() < that.pot.highBid)  {
-      dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better.player_id));
-      current_better.actions.setBudget(0);
-
-    } else {
-      dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better.player_id));
-      current_better.actions.subBudget(that.pot.highBid);
     }
+    if(current_better.actions.canBet()) {
+      bet_actions.numCalls++;
 
-    if(bet_actions.numCalls === activePlayers.length) {
-      dispatchEvent(new TurnEndedEvent());
-      return newTurn();
+      if(current_better.actions.getBudget() < that.pot.highBid)  {
+        dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better.player_id));
+        current_better.actions.setBudget(0);
+      } else {
+        dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better.player_id));
+        current_better.actions.subBudget(that.pot.highBid);
+      }
+      if(bet_actions.numCalls === activePlayers.length) {
+        dispatchEvent(new TurnEndedEvent());
+        return newTurn();
+      }
+      current_better.actions.hasBet();
+      return newBet();
     }
-    return newBet();
   }
 
   this.getPlayerById = function(player_id) {
-	  return that.players[player_id];
+    return that.players[player_id];
   }
 
   this.evaluateWinner = function() {
@@ -287,73 +284,73 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 }
 
 var BetStartedEvent = function(current_better) {
-	this.event_type = Poker.BET_START_EVENT;
-	this.getBetter = function() {
-		return current_better;
-	}
+  this.event_type = Poker.BET_START_EVENT;
+  this.getBetter = function() {
+    return current_better;
+  }
 }
 
 var BetEndedEvent = function(bet_type, bet_amount, player) {
-	this.event_type = Poker.BET_ENDED_EVENT;
+  this.event_type = Poker.BET_ENDED_EVENT;
 
-	this.getBetAmount = function() {
-		return bet_amount;
-	}
+  this.getBetAmount = function() {
+    return bet_amount;
+  }
 
-	this.getBetType = function() {
-		return bet_type;
-	}
+  this.getBetType = function() {
+    return bet_type;
+  }
 
-	this.getPreviousBetter = function() {
-		return player;
-	}
+  this.getPreviousBetter = function() {
+    return player;
+  }
 }
 
 var RoundStartedEvent = function(smallBlind, dealer) {
-	this.event_type = Poker.ROUND_STARTED_EVENT;
-	this.getSmallBlind = function() {
-		return smallBlind;
-	}
+  this.event_type = Poker.ROUND_STARTED_EVENT;
+  this.getSmallBlind = function() {
+    return smallBlind;
+  }
 
-	this.getBigBlind = function() {
-		return bigBlind;
-	}
+  this.getBigBlind = function() {
+    return bigBlind;
+  }
 
-	this.getDealer = function() {
-		return players[dealer];
-	}
+  this.getDealer = function() {
+    return players[dealer];
+  }
 }
 
 var RoundEndedEvent = function() {
   this.event_type = Poker.ROUND_ENDED_EVENT;
-  
+
   //who won
 
 }
 
 // changed flipped cards from being parameter to function
 var TurnStartedEvent = function(state) {
-	this.event_type = Poker.TURN_STARTED_EVENT;
-// var flippedCards = deck.getNextCards(state);
-	this.getTurnState = function() {
-		switch(state) {
-    case 0:
-    return "pre flop"
-    case 1:
-		return "flop";
-		case 2:
-		return "turn";
-		case 3:
-		return "river";
-		}
-	}
-	this.getFlippedCards = function() {
-		return flippedCards;
-	}
+  this.event_type = Poker.TURN_STARTED_EVENT;
+  // var flippedCards = deck.getNextCards(state);
+  this.getTurnState = function() {
+    switch(state) {
+      case 0:
+      return "pre flop"
+      case 1:
+      return "flop";
+      case 2:
+      return "turn";
+      case 3:
+      return "river";
+    }
+  }
+  this.getFlippedCards = function() {
+    return flippedCards;
+  }
 }
 
 var TurnEndedEvent = function() {
-	this.event_type = Poker.TURN_ENDED_EVENT;
+  this.event_type = Poker.TURN_ENDED_EVENT;
 
 }
 
