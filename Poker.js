@@ -252,7 +252,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
     bet_actions.numCalls++;
 
-
+    console.log(current_better.getName());
     if(current_better.actions.getBudget() < that.pot.highBid)  {
       dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better.player_id));
       current_better.actions.setBudget(0);
