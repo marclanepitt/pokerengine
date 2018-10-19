@@ -1,5 +1,5 @@
 var Human = function (name) {
-  this.player = new Player(name);
+  this.actions = new Player(name);
 
   var match = null;
   var current_round = null;
@@ -24,12 +24,30 @@ var Human = function (name) {
 
     });
 
+    current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, function (e) {
+      console.log("turn ended");
+
+  });
+
     current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
+      console.log("bet started ");
       console.log(e.getBetter().getName());
+      if(e.getBetter().player_id === id) {
         $("#betButton").on("click", function(e) {
-            current_round.check(id)
+            current_round.raise($("#betAmount").val(),id);
         });
+        $("#callButton").on("click", function(e) {
+          current_round.call(id);
+         });
+          $("#checkButton").on("click", function(e) {
+            current_round.check(id);
+        });
+        $("#foldButton").on("click", function(e) {
+          current_round.fold(id);
+      });
+    }
     });
+    
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
         console.log("bet ended");
