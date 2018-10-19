@@ -133,8 +133,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     // pay blind
     // bet starting with player left of big blind
     // !!! must be able to pass dealer position to bet
-	dispatchEvent(new TurnStartedEvent(current_turn));
-	that.newBet();
+	 dispatchEvent(new TurnStartedEvent(current_turn));
+	 that.newBet();
   }
 
   this.newTurn = function() {
@@ -201,6 +201,18 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   this.getPlayerById = function(player_id) {
 	  return that.players[player_id];
+  }
+
+  this.evaluateWinner = function() {
+    // Get a subset of all players that need to be evaluated
+    var validPlayers = [];
+    for(let i = 0; i < that.players.length; i++) {
+      if(that.players[i].active) {
+        validPlayers.push(that.players[i]);
+      }
+    }
+
+
   }
 }
 
