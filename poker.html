@@ -17,6 +17,7 @@
     <script src="DumbAI.js"></script>
     <script src="Human.js"></script>
     <script>
+        $(document).ready(function(){
         var human = new Human("Marc");
         var ai = new DumbAI("computer");
         var ai1 = new DumbAI("computer1");
@@ -26,9 +27,10 @@
         var match = new PokerMatch(players, {});
 
         match.run();
+        });
     </script>
 </head>
 <body>
-    
+    <button id="betButton">bet</button>
 </body>
 </html>

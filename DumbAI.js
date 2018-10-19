@@ -15,6 +15,19 @@ var DumbAI = function (name) {
 
     this.setupNextRound = function (round_of_poker, id) {
 	current_round = round_of_poker;
-	player_id = id;
+    player_id = id;
+      current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
+      });
+  
+      current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
+  
+      });
+  
+      current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
+
+      });
+  
+      current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
+      });
     }
 }

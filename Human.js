@@ -16,21 +16,23 @@ var Human = function (name) {
     current_round = round_of_poker;
     player_id = id;
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
-      console.log(e);
+      console.log("round start");
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
-        console.log(e);
+        console.log("turn started");
 
     });
 
     current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
-        console.log(e.getBetter());
-        current_round.fold(e.getBetter().player_id);
+      console.log(e.getBetter().getName());
+        $("#betButton").on("click", function(e) {
+            current_round.check(id)
+        });
     });
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
-        console.log(e);
+        console.log("bet ended");
     });
   }
 }

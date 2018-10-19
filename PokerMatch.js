@@ -50,7 +50,6 @@ var PokerMatch = function (players, settings) {
     next_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, round_end_handler);
 
     for(var i = 0; i < that.players.length; i++) {
-      console.log(that.players[i]);
       that.players[i].setupNextRound(next_round, that.players[i].player_id);
     }
 
