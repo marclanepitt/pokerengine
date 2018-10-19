@@ -42,6 +42,13 @@ var Poker = {
   //game over event
 };
 
+var PokerHandResult = function(cards, player, type, value) {
+  this.cards = cards;
+  this.player = player;
+  this.type = type;
+  this.value = value;
+}
+
 var RoundOfPoker = function (smallBlind, dealer, players) {
 
   this.players = players;
@@ -86,6 +93,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var dispatch_queue = [];
   var dispatching = false;
+
+  var _ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
 
   var dispatchEvent = function (e) {
     if (dispatching) {
@@ -279,7 +288,158 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       }
     }
 
+    // TODO: fix this function to implement current cards on the table
+    // Keep NULL player object for results below
+    let tableCards = null;
+    let best = new PokerHandResult(tableCards, null, 'none', 0);
 
+    for(let i = 0; i < that.validPlayers.length; i++) {
+      // Combine table cards with the player's cards
+      let allCards = tableCards.concat(that.validPlayers[i].hand);
+
+      for(let combination of _combinations(allCards, 5)) {
+        // Calculate value of best 5 cards
+        let result = _calculate(combination, validPlayers[i]);
+        if(result.value > best.value) {
+          best = result;
+        }
+      }
+    }
+
+    return best;
+  }
+
+  var _combinations = function (cards, group) {
+    // Double array of card combinations
+    let result = [];
+
+    // Return null if length of cards is less than group size
+    if(groups > cards.length)
+      return result;
+
+    // Return cards if length of cards is equal to group size
+    if(groups === cards.length) {
+      return [cards];
+    }
+
+    // One card in each group
+    if(group === 1) {
+      return cards.map((card) => [card]);
+    }
+
+    // All other cases
+    for (let i = 0; i < cards.length - groups; i++) {
+      let head = cards.slice(i, i + 1);
+      let tails = _combinations(cards.slice(i + 1), groups - 1);
+      for(let tail of tails) {
+        results.push(head.concat(tail));
+      }
+    }
+
+    return results;
+  }
+
+  var _calculate = function(cards, player) {
+    // Check for card rank and whether it's a flush or straight
+    let ranked = _ranked(cards);
+    let isFlush = _isFlush(cards);
+    let isStraight = _isStraight(cards);
+
+    if (isStraight && isFlush && ranked[0][0].rank == 'ace') {
+      return new PokerHandResult(cards, player, 'royal flush', _calculateValue(ranked, 9));
+    } else if (isStraight && isFlush) {
+      return new PokerHandResult(cards, player, 'straight flush', _calculateValue(ranked, 8));
+    } else if (ranked[0].length == 4) {
+      return new PokerHandResult(cards, player, 'four of a kind', _calculateValue(ranked, 7));
+    } else if (ranked[0].length == 3 && ranked[1].length == 2) {
+      return new PokerHandResult(cards, player, 'full house', _calculateValue(ranked, 6));
+    } else if (isFlush) {
+      return new PokerHandResult(cards, player, 'flush', _calculateValue(ranked, 5));
+    } else if (isStraight) {
+      return new PokerHandResult(cards, player, 'straight', _calculateValue(ranked, 4));
+    } else if (ranked[0].length == 3) {
+      return new PokerHandResult(cards, player, 'three of a kind', _calculateValue(ranked, 3));
+    } else if (ranked[0].length == 2 && ranked[1].length == 2) {
+      return new PokerHandResult(cards, player, 'two pair', _calculateValue(ranked, 2));
+    } else if (ranked[0].length == 2) {
+      return new PokerHandResult(cards, player, 'one pair', _calculateValue(ranked, 1));
+    } else {
+      return new PokerHandResult(cards, player, 'high card', _calculateValue(ranked, 0));
+    }
+  }
+
+  var _ranked = function(cards) {
+    // Split cards by rank
+    // 2D array of cards, sorted by rank and number of cards in that rank
+    let result = [];
+
+    for (let card of cards) {
+      // TODO: reformat Card.js for this to work
+      let r = _ranks.indexOf(card.getRank());
+      // result[r] = result[r] || [];
+      result[r].push(card);
+    }
+
+    // Condense results
+    result = result.filter((rank) => !!rank);
+
+    // High to low
+    result.reverse();
+
+    // Place pairs and sets first
+    result.sort((a, b) => {
+        return a.length > b.length ? -1 : a.length < b.length ? 1 : 0;
+    });
+  }
+
+  // Will work regardless of refactoring of Card.js
+  var _isFlush = function(cards) {
+    let suit = cards[0][0].getSuit();
+
+    for (let card of cards) {
+      if(card.getSuit() !== suit) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  var _isStraight = function(cards) {
+    // Must have 5 different ranks
+    if(!cards[4]) { return false; }
+
+    // Edge case for ace card
+    // TODO: refactor Card.js for this to work
+    if(cards[0][0].getRank() === 'ace' && cards[1][0].getRank() === 5 && cards[4][0] === 2) {
+      // Ace is low, 5 is high
+      ranked.push(ranked.shift());
+      return true;
+    }
+
+    // Make sure that the cards are 5 in a row
+    let startCard = _ranks.indexOf(ranked[0][0].getRank());
+    let endCard = _ranks.indexOf(ranked[4][0].getRank());
+    return (startCard - endCard) === 4;
+  }
+
+  // Primary is a number determined by the type of hand the player has
+  var _calculateValue = function(cards, primary) {
+    let result = '';
+
+    for (let card of cards) {
+      // Create two digit value
+      let rank = _ranks.indexOf(card[0].getRank());
+      let value = (rank < 10 ? '0' : '') + rank;
+
+      for (let i = 0; i < card.length; i++) {
+        // Append value of each card
+        result += value;
+      }
+    }
+
+    // Return an integer
+    return (primary * 10000000000) + parseInt(result);
   }
 }
 

@@ -1,13 +1,12 @@
 /* Model object for a playing card. */
 
 var Card = function(rank, suit) {
-
     this.getRank = function () {
-	return rank;
+		return rank;
     }
 
     this.getSuit = function () {
-	return suit;
+		return suit;
     }
 }
 
