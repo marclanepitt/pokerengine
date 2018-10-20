@@ -162,6 +162,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         // winner.addBudget(that.pot.total);
         // if(gameOverCheck(players)) dispatch(GAME_OVER_EVENT)
         dispatchEvent(new RoundEndedEvent());
+        roundCleanup();
+        return;
       }
       dispatchEvent(new TurnStartedEvent(current_turn));
       return newBet();
@@ -182,7 +184,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return current_better.player_id === player_id;
   }
 
+  var roundCleanup = function() {
+    dispatch_queue = [];
+  }
+
   this.startRound = function() {
+    console.log("round start")
     dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
 
     // need pre-flop logic
@@ -199,6 +206,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   this.raise = function(bet_amount, player_id) {
     if(!isBetter(player_id)) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
+      return;
+    }
+
+    if(current_turn === 4) {
       return;
     }
 
@@ -257,6 +268,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       return;
     }
     if(current_better.actions.canBet()) {
+
       bet_actions.numCalls++;
 
       if(current_better.actions.getBudget() < that.pot.highBid)  {

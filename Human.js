@@ -6,6 +6,8 @@ var Human = function (name) {
   var player_id = null;
   var executeToken = 1;
 
+  var that = this;
+
   this.setupMatch = function (poker_match) {
     match = poker_match;
   }
@@ -48,6 +50,7 @@ var Human = function (name) {
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
       console.log("bet ended");
+      console.log(that.actions.getBudget());
     });
 
     current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, function (e) {

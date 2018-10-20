@@ -11,7 +11,7 @@ var PokerMatch = function (players, settings) {
 
 
   for(var i = 0; i < players.length; i++) {
-    players[i].budget = this.settings.startingBudget;
+    players[i].actions.setBudget(this.settings.startingBudget);
     players[i].player_id = i;
   }
 
@@ -21,10 +21,11 @@ var PokerMatch = function (players, settings) {
   var that = this;
 
   var round_end_handler = function (e) {
+    console.log("Round ended");
     var count = 0;
     for(var i = 0; i < players.length; i++) {
 
-      that.players[i].budget += e.round.getWinnings(that.players[i].player_id);
+      //that.players[i].budget += e.round.getWinnings(that.players[i].player_id);
       if(that.players[i].budget === 0) {
         count++;
       }
