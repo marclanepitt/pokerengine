@@ -15,7 +15,7 @@ var PokerMatch = function (players, settings) {
     players[i].player_id = i;
   }
 
-  var smallBlind = 1;
+  var smallBlind = 2;
   var roundCount = 1;
 
   var that = this;

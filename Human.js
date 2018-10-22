@@ -50,7 +50,6 @@ var Human = function (name) {
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
       console.log("bet ended");
-      console.log(that.actions.getBudget());
     });
 
     current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, function (e) {

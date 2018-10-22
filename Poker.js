@@ -145,7 +145,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   var newTurn = function() {
-    setTimeout(() => {
       bet_actions.numChecks = 0;
       bet_actions.numCalls = 0;
       for(var i = 0; i < players.length; i++) {
@@ -162,12 +161,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         // winner.addBudget(that.pot.total);
         // if(gameOverCheck(players)) dispatch(GAME_OVER_EVENT)
         dispatchEvent(new RoundEndedEvent());
-        roundCleanup();
         return;
       }
       dispatchEvent(new TurnStartedEvent(current_turn));
       return newBet();
-    }, 500);
   }
 
   var newBet = function() {
@@ -184,12 +181,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return current_better.player_id === player_id;
   }
 
-  var roundCleanup = function() {
-    dispatch_queue = [];
-  }
-
   this.startRound = function() {
-    console.log("round start")
     dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
 
     // need pre-flop logic
@@ -278,6 +270,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better.player_id));
         current_better.actions.setBudget(0);
       } else {
+        if(that.pot.highBidder === null && that.pot.highBid === 0) {
+          that.pot.highBidder = current_better;
+          that.pot.highBid = smallBlind * 2;
+        }
         dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better.player_id));
         current_better.actions.subBudget(that.pot.highBid);
       }
@@ -488,7 +484,7 @@ var RoundStartedEvent = function(smallBlind, dealer) {
   }
 
   this.getBigBlind = function() {
-    return bigBlind;
+    return smallBlind * 2;
   }
 
   this.getDealer = function() {

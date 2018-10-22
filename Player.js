@@ -27,7 +27,7 @@ Player.prototype.activate = function() { this.active = true; }
 Player.prototype.getActiveStatus = function() { return this.active; }
 // budget
 Player.prototype.addBudget = function(winnings) { this.budget += winnings; }
-Player.prototype.subBudget = function(losings) { this.budget += -losings; }
+Player.prototype.subBudget = function(losings) { this.budget += -1 * losings;}
 Player.prototype.getBudget = function() { return this.budget; }
 Player.prototype.setBudget = function(amount) { this.budget = amount; }
 // hand
