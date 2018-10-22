@@ -196,10 +196,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   this.raise = function(bet_amount, player_id) {
+
     if(!isBetter(player_id)) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;
     }
+
     if(current_better.actions.canBet()) {
       if(player_id === that.pot.highBidder) {
         dispatchEvent(new TurnEndedEvent());
@@ -208,7 +210,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         that.pot.total += bet_amount;
         //subtract players money
         current_better.actions.subBudget(bet_amount);
-        dispatchEvent(new BetEndedEvent("bet", bet_amount, player_id));
+        dispatchEvent(new BetEndedEvent("bet", bet_amount, current_better));
         return newBet();
       } else if(bet_amount <= that.pot.highBid) {
         dispatchEvent(new Error("Bet does not exceed current highest bid"));
@@ -218,10 +220,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         that.pot.total += bet_amount;
         //subtract players money
         current_better.actions.subBudget(bet_amount);
-        dispatchEvent(new BetEndedEvent("bet", bet_amount, player_id));
+        dispatchEvent(new BetEndedEvent("bet", bet_amount, current_better));
         current_better.actions.hasBet();
         return newBet();
       }
+    } else {
+      dispatchEvent(new Error("Cannot raise"));
     }
   }
 
@@ -233,7 +237,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(current_better.actions.canBet()) {
       activePlayers.splice(activePlayers.indexOf(player_id),1); //out of round not game
 
-      dispatchEvent(new BetEndedEvent("fold", -1, player_id));
+      dispatchEvent(new BetEndedEvent("fold", -1, current_better));
       current_better.actions.hasBet();
       return newBet();
     }
@@ -250,7 +254,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         return newTurn();
       }
 
-      dispatchEvent(new BetEndedEvent("check", 0, player_id));
+      dispatchEvent(new BetEndedEvent("check", 0, current_better));
       bet_actions.numChecks++;
       current_better.actions.hasBet();
       return newBet();
@@ -267,14 +271,14 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       bet_actions.numCalls++;
 
       if(current_better.actions.getBudget() < that.pot.highBid)  {
-        dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better.player_id));
+        dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better));
         current_better.actions.setBudget(0);
       } else {
         if(that.pot.highBidder === null && that.pot.highBid === 0) {
           that.pot.highBidder = current_better;
           that.pot.highBid = smallBlind * 2;
         }
-        dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better.player_id));
+        dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better));
         current_better.actions.subBudget(that.pot.highBid);
       }
       if(bet_actions.numCalls === activePlayers.length) {
@@ -488,7 +492,7 @@ var RoundStartedEvent = function(smallBlind, dealer) {
   }
 
   this.getDealer = function() {
-    return players[dealer];
+    return dealer;
   }
 }
 

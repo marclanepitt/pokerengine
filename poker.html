@@ -15,15 +15,15 @@
     <script src="Card.js"></script>
     <script src="Player.js"></script>
     <script src="DumbAI.js"></script>
-    <script src="Human.js"></script>
+    <script src="TextPlayer.js"></script>
     <script>
         $(document).ready(function(){
-        var human = new Human("Marc");
+        var textplayer = new TextPlayer("Marc");
         var ai = new DumbAI("computer");
         var ai1 = new DumbAI("computer1");
         var ai2 = new DumbAI("computer2");
 
-        var players = [human,ai,ai1,ai2]
+        var players = [textplayer,ai,ai1,ai2]
         var match = new PokerMatch(players, {});
 
         match.run();
@@ -32,10 +32,10 @@
 </head>
 <body>
     <!-- <input type="text" id="betAmount"> -->
-    <button id="betButton">bet</button>
-    <button id="callButton">call</button>
-    <button id="foldButton">fold</button>
-    <button id="checkButton">check</button>
+    <div id="matchWrapper">
+        <input type="text" id="pokerConsole">
+        <button id="consoleSubmit">Enter</button>
+    </div>
 
 </body>
 </html>
