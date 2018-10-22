@@ -11,12 +11,15 @@ var Player = function (name, budget) {
   this.player_id = name.hashCode(),
   this.hand = [],  // best way to initalize this?
   this.hasNotBet = true;
+  this.current_bet = 0;
 }
-
+Player.prototype.addCurrentBet = function(amount) { this.current_bet += amount; }
+Player.prototype.getCurrentBet = function() { return this.current_bet; }
+Player.prototype.setCurrentBet = function(amount) { this.current_bet = amount; }
+// bet validators
 Player.prototype.resetHasBet = function() { this.hasNotBet = true; }
 Player.prototype.hasBet = function() { this.hasNotBet = false; }
 Player.prototype.canBet = function() { return this.hasNotBet; }
-
 // name and id
 Player.prototype.getName = function() { return this.name; }
 Player.prototype.getId = function() { return this.player_id; }
