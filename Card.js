@@ -2,7 +2,8 @@
 
 var Card = function(rank, suit) {
     this.getRank = function () {
-		return rank;
+    	// Make sure that the rank is an integer
+		return parseInt(rank);
     }
 
     this.getSuit = function () {
@@ -54,7 +55,7 @@ Card.parseRank = function(rank) {
 		    rank_val = -1;
 		}
     }
-    
+
     if (rank_val < 2 || rank_val > 14) {
 		return undefined;
     }

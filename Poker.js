@@ -94,7 +94,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   var dispatch_queue = [];
   var dispatching = false;
 
-  var _ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
+  var _ranks = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
   var dispatchEvent = function (e) {
     if (dispatching) {
@@ -329,8 +329,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     let result = [];
 
     // Return null if length of cards is less than group size
-    if(groups > cards.length)
-    return result;
+    if(groups > cards.length) { return result; }
 
     // Return cards if length of cards is equal to group size
     if(groups === cards.length) {
@@ -360,7 +359,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     let isFlush = _isFlush(cards);
     let isStraight = _isStraight(cards);
 
-    if (isStraight && isFlush && ranked[0][0].rank == 'ace') {
+    if (isStraight && isFlush && ranked[0][0].rank == 14) {
       return new PokerHandResult(cards, player, 'royal flush', _calculateValue(ranked, 9));
     } else if (isStraight && isFlush) {
       return new PokerHandResult(cards, player, 'straight flush', _calculateValue(ranked, 8));
@@ -389,9 +388,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     let result = [];
 
     for (let card of cards) {
-      // TODO: reformat Card.js for this to work
       let r = _ranks.indexOf(card.getRank());
-      // result[r] = result[r] || [];
       result[r].push(card);
     }
 
@@ -424,9 +421,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     // Must have 5 different ranks
     if(!cards[4]) { return false; }
 
-    // Edge case for ace card
-    // TODO: refactor Card.js for this to work
-    if(cards[0][0].getRank() === 'ace' && cards[1][0].getRank() === 5 && cards[4][0] === 2) {
+    // Edge case for ace card, ACE = 14
+    if(cards[0][0].getRank() === 14 && cards[1][0].getRank() === 5 && cards[4][0] === 2) {
       // Ace is low, 5 is high
       ranked.push(ranked.shift());
       return true;
