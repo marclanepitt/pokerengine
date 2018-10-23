@@ -18,6 +18,9 @@ var TextPlayer = function (name) {
       </div>`;
       $("#matchWrapper").append([playerEl]);
     }
+
+    let pot = $("<div id='pot'></div>");
+    $("body").append(pot);
   }
 
   this.getName = function () {
@@ -59,11 +62,27 @@ var TextPlayer = function (name) {
             $("#pokerConsole").val("invalid command");
           }
         });
+        $("#pokerConsole").change(function() {
+          let input = $("#pokerConsole").val();
+          if(input.substring(0,6) === "raise(" && input[input.length-1] === ")" ) {
+              let number = parseInt(input.substring(6,input.length-1));
+              current_round.raise(number, e.getBetter().player_id);
+          } else if(input === "call()") {
+              current_round.call(e.getBetter().player_id);
+          } else if(input ==="fold()") {
+              current_round.fold(e.getBetter().player_id);
+          } else if(input === "check()"){
+              current_round.check(e.getBetter().player_id);
+          }else {
+            $("#pokerConsole").val("invalid command");
+          }
+        });
       }
     });
 
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
+      $("#pot").text(JSON.stringify(current_round.pot));
       console.log("bet ended");
 
         $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());

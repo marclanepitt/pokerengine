@@ -16,6 +16,16 @@ var DumbAI = function (name) {
       current_round = round_of_poker;
       player_id = id;
 
+      var getMax = function(pot) {
+        var max = 0;
+        for(var player in pot ) {
+          if(pot[player] > max) {
+            max = pot[player];
+          }
+        }
+        return max;
+      }
+
       current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
       });
 
@@ -24,23 +34,31 @@ var DumbAI = function (name) {
       });
 
       current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
+        // if(e.getBetter().player_id === id) {
+        //   current_round.call(id);
+        // }
         if(e.getBetter().player_id === id) {
-          current_round.call(id);
+            let action = e.getValidActions()[Math.floor(Math.random()*e.getValidActions().length)];
+            if(action.length === 2) {
+              let maxBet  = getMax(current_round.pot);
+              let aiPot = current_round.pot[id];
+              console.log("mb: " + maxBet);
+              console.log("ai_p: " + aiPot);
+              console.log("diff: " + (maxBet-aiPot));
+              action((maxBet-aiPot)+1, e.getBetter().player_id);
+            } else {
+              action(e.getBetter().player_id);
+            }
+            // $("#callButton").on("click", function(e) {
+          //   current_round.call(id);
+          // });
         }
-          // if(e.getBetter().player_id === id) {
-          //     let action = e.getValidActions()[Math.floor(Math.random()*e.getValidActions().length)];
-          //     if(action.length === 2) {
-          //       action(Math.floor(e.getBetter().actions.getBudget()/3), e.getBetter().player_id);
-          //     } else {
-          //       action(e.getBetter().player_id);
-          //     }
-          //     // $("#callButton").on("click", function(e) {
-          //   //   current_round.call(id);
-          //   // });
-          // }
       });
 
       current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
+        if(e.getPreviousBetter().player_id === id) {
+          console.log(e.getBetType());
+        }
       });
 
       current_round.registerEventHandler(Poker.ERROR, function(e) {
