@@ -51,6 +51,9 @@ var PokerHandResult = function(cards, player, type, value) {
 
 var RoundOfPoker = function (smallBlind, dealer, players) {
 
+  this.deck = new Deck();
+  this.deck.shuffle();
+
   this.players = players;
   this.dealer = dealer;
   this.pot = {};
@@ -504,11 +507,11 @@ var BetEndedEvent = function(bet_type, bet_amount, player) {
 var RoundStartedEvent = function(smallBlind, dealer) {
   this.event_type = Poker.ROUND_STARTED_EVENT;
   this.getSmallBlind = function() {
-    return smallBlind;
+    return smallBlind; //should we return player?
   }
 
   this.getBigBlind = function() {
-    return smallBlind * 2;
+    return smallBlind * 2; //should we return player?
   }
 
   this.getDealer = function() {
