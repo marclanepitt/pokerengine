@@ -166,7 +166,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       }
       if(current_turn === 4) {
         // check winner, add money
-        // winnner <- activeHands.evaluate();
+        // winner <- activeHands.evaluate();
         // winner.addBudget(that.pot.total);
         // if(gameOverCheck(players)) dispatch(GAME_OVER_EVENT)
         dispatchEvent(new RoundEndedEvent());
@@ -181,19 +181,34 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       var dealer_index = activePlayers.indexOf(that.dealer.player_id)
       current_better = players[activePlayers[(dealer_index+bet_index)%activePlayers.length]];
       //end turn and new turn if we reach terminating player
+      console.log("terminating player:" + players[terminatingPlayer].getName());
+      console.log("current better: "+current_better.getName())
       if(current_better.player_id === terminatingPlayer) {
-        console.log("hi")
         dispatchEvent(new TurnEndedEvent());
         return newTurn();
       }
 
-      dispatchEvent(new BetStartedEvent(current_better));
+      dispatchEvent(new BetStartedEvent(current_better, getValidActions()));
       bet_index++;
     }, 500);
   }
 
   var isBetter = function(player_id) {
     return current_better.player_id === player_id;
+  }
+  
+  var getValidActions = function() {
+    //bet logic, when can they call, when can they raise, when can they check
+    let validActions = [that.fold];
+    //they can call if not first bet, probably missing a case
+    if(!(bet_index === 1 && current_turn !== 1) && !(bet_index === 3 && current_turn === 1)) {
+      validActions.push(that.call);
+    }
+    //they can raise if they haven't raised before
+    if(current_better.player_id !== terminatingPlayer.player_id) {
+      validActions.push(that.raise);
+    }
+    return validActions
   }
 
   this.startRound = function() {
@@ -460,10 +475,13 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 }
 
-var BetStartedEvent = function(current_better) {
+var BetStartedEvent = function(current_better, validActions) {
   this.event_type = Poker.BET_START_EVENT;
   this.getBetter = function() {
     return current_better;
+  }
+  this.getValidActions = function() {
+    return validActions;
   }
 }
 

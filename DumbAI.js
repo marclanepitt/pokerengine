@@ -25,9 +25,13 @@ var DumbAI = function (name) {
 
       current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
           if(e.getBetter().player_id === id) {
-            current_round.call(id);
-
-            // $("#callButton").on("click", function(e) {
+              let action = e.getValidActions()[Math.floor(Math.random()*e.getValidActions().length)];
+              if(action.length === 2) {
+                action(Math.floor(e.getBetter().actions.getBudget()/10), e.getBetter().player_id);
+              } else {
+                action(e.getBetter().player_id);
+              }
+              // $("#callButton").on("click", function(e) {
             //   current_round.call(id);
             // });
           }
