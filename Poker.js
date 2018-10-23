@@ -267,7 +267,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       return;
     }
     if(current_better.actions.canBet()) {
-
       bet_actions.numCalls++;
 
       if(current_better.actions.getBudget() < that.pot.highBid)  {
@@ -278,8 +277,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
           that.pot.highBidder = current_better;
           that.pot.highBid = smallBlind * 2;
         }
-        dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better));
         current_better.actions.subBudget(that.pot.highBid);
+        dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better));
       }
       if(bet_actions.numCalls === activePlayers.length) {
         dispatchEvent(new TurnEndedEvent());
