@@ -53,11 +53,14 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   this.players = players;
   this.dealer = dealer;
+  this.pot = {};
+
 
   var activePlayers = [];
   for(let i = 0; i < players.length; i++) {
     if(players[i].actions.getActiveStatus()) {
       activePlayers.push(players[i].player_id);
+      this.pot[players[i].player_id] = 0;
     }
   }
 
@@ -72,13 +75,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     numCalls: 0
   }
 
-  var status = 0;
+  var terminatingPlayer = activePlayers[activePlayers.indexOf(dealer.player_id) + 3 % activePlayers.length]
 
-  this.pot = {
-    total: 0,
-    highBid: 0,
-    highBidder: null
-  }
 
   var registeredEventHandlers = {};
 
@@ -95,6 +93,16 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   var dispatching = false;
 
   var _ranks = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+
+  var getMaxBet = function(){
+    var max = 0;
+    for(var player in that.pot ) {
+      if(that.pot[player] > max) {
+        max = that.pot[player];
+      }
+    }
+    return max;
+  }
 
   var dispatchEvent = function (e) {
     if (dispatching) {
@@ -145,6 +153,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   var newTurn = function() {
+      terminatingPlayer = activePlayers[(activePlayers.indexOf(dealer.player_id) + 2) % activePlayers.length];
       bet_actions.numChecks = 0;
       bet_actions.numCalls = 0;
       for(var i = 0; i < players.length; i++) {
@@ -169,9 +178,15 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var newBet = function() {
     setTimeout(() => {
-      //add bet logic
       var dealer_index = activePlayers.indexOf(that.dealer.player_id)
       current_better = players[activePlayers[(dealer_index+bet_index)%activePlayers.length]];
+      //end turn and new turn if we reach terminating player
+      if(current_better.player_id === terminatingPlayer) {
+        console.log("hi")
+        dispatchEvent(new TurnEndedEvent());
+        return newTurn();
+      }
+
       dispatchEvent(new BetStartedEvent(current_better));
       bet_index++;
     }, 500);
@@ -203,22 +218,18 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
 
     if(current_better.actions.canBet()) {
-      if(player_id === that.pot.highBidder) {
-        dispatchEvent(new TurnEndedEvent());
-        return newTurn();
-      } else if(bet_amount === current_better.actions.getBudget()) {
-        that.pot.total += bet_amount;
-        //subtract players money
+      if(bet_amount === current_better.actions.getBudget()) {
+        that.pot[current_better.player_id] += bet_amount;
+
         current_better.actions.subBudget(bet_amount);
         dispatchEvent(new BetEndedEvent("bet", bet_amount, current_better));
         return newBet();
-      } else if(bet_amount <= that.pot.highBid) {
+      } else if(bet_amount <= getMaxBet()) {
         dispatchEvent(new Error("Bet does not exceed current highest bid"));
       } else {
-        that.pot.highBid = bet_amount;
-        that.pot.highBidder = player_id;
-        that.pot.total += bet_amount;
-        //subtract players money
+        terminatingPlayer = current_better.player_id;
+        that.pot[current_better.player_id] += bet_amount;
+
         current_better.actions.subBudget(bet_amount);
         dispatchEvent(new BetEndedEvent("bet", bet_amount, current_better));
         current_better.actions.hasBet();
@@ -269,16 +280,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(current_better.actions.canBet()) {
       bet_actions.numCalls++;
 
-      if(current_better.actions.getBudget() < that.pot.highBid)  {
+      if(current_better.actions.getBudget() < getMaxBet())  {
         dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better));
         current_better.actions.setBudget(0);
       } else {
-        if(that.pot.highBidder === null && that.pot.highBid === 0) {
-          that.pot.highBidder = current_better;
-          that.pot.highBid = smallBlind * 2;
-        }
-        current_better.actions.subBudget(that.pot.highBid);
-        dispatchEvent(new BetEndedEvent("call", that.pot.highBid, current_better));
+        current_better.actions.subBudget(getMaxBet());
+        dispatchEvent(new BetEndedEvent("call", getMaxBet(), current_better));
       }
       if(bet_actions.numCalls === activePlayers.length) {
         dispatchEvent(new TurnEndedEvent());
