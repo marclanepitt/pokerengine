@@ -31,7 +31,7 @@ Player.prototype.subBudget = function(losings) { this.budget += -1 * losings;}
 Player.prototype.getBudget = function() { return this.budget; }
 Player.prototype.setBudget = function(amount) { this.budget = amount; }
 // hand
-Player.prototype.getHand = function() { return this.hand; }
+Player.prototype.getHand = function() { return this.hand; } //hand should be a round of poker object
 Player.prototype.addCard = function(card) {
   if(this.hand.length > 2) {
     return false;

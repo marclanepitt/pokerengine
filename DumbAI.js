@@ -27,7 +27,7 @@ var DumbAI = function (name) {
           if(e.getBetter().player_id === id) {
               let action = e.getValidActions()[Math.floor(Math.random()*e.getValidActions().length)];
               if(action.length === 2) {
-                action(Math.floor(e.getBetter().actions.getBudget()/10), e.getBetter().player_id);
+                action(Math.floor(e.getBetter().actions.getBudget()/3), e.getBetter().player_id);
               } else {
                 action(e.getBetter().player_id);
               }

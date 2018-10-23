@@ -52,20 +52,22 @@ var PokerHandResult = function(cards, player, type, value) {
 var RoundOfPoker = function (smallBlind, dealer, players) {
 
   this.deck = new Deck();
-  this.deck.shuffle();
 
   this.players = players;
   this.dealer = dealer;
   this.pot = {};
 
+  this.hands = {};
 
   var activePlayers = [];
   for(let i = 0; i < players.length; i++) {
     if(players[i].actions.getActiveStatus()) {
       activePlayers.push(players[i].player_id);
       this.pot[players[i].player_id] = 0;
+      this.hands[players[i].player_id] = [];
     }
   }
+  console.log(this.hands)
 
   var current_turn = 0;
   var flipped_cards = [];
@@ -218,11 +220,16 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
 
     // need pre-flop logic
-    // get deck
+    // get deck: done at top
     // shuffle deck
-    // deal "hole" cards
+    that.deck.shuffle();
+    // deal "hole" cards: burn?
     // deal cards
-    // pay blind
+    for(let i = 0; i < activePlayers.length; i++) {
+      let cards = that.deck.deal(2);
+      that.hands[activePlayers[i]].push(cards);
+    }
+    // pay blinds
     // bet starting with player left of big blind
     // !!! must be able to pass dealer position to bet
     return newTurn();
