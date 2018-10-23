@@ -41,6 +41,7 @@ var PokerMatch = function (players, settings) {
     if(roundCount % 3 === 0) {
       smallBlind = smallBlind * 2;
     }
+    //TODO only do active players
     var dealer = that.players[roundCount % that.players.length];
     var next_round = new RoundOfPoker(smallBlind, dealer, that.players);
 
