@@ -1,3 +1,32 @@
+body {
+	text-align: center;
+}
+
+#messageLog {
+	width: 400px;
+	height: 500px;
+	max-height: 500px;
+	border: 1px solid black;
+
+	text-align: left;
+
+	margin-left: 50%;
+	transform: translateX(-50%);
+	margin-bottom: 30px;
+
+	overflow-y: scroll;
+}
+
+#messageLog>p {
+	border-bottom: 1px solid black;
+	margin: 0;
+	padding: 10px;
+}
+
+#matchConsole {
+	display: none;
+}
+
 .player {
     margin: 1vh 0 1vh 0;
 }
