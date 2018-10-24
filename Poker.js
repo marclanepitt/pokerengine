@@ -65,10 +65,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(players[i].actions.getActiveStatus()) {
       activePlayerIds.push(players[i].player_id);
       this.pot[players[i].player_id] = 0;
-      this.hands[players[i].player_id] = [];
     }
   }
-
   var current_turn = 0;
   var flipped_cards = [];
 
@@ -220,7 +218,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   this.startRound = function() {
-    dispatchEvent(new RoundStartedEvent(smallBlind, dealer, that.hands));
 
     // need pre-flop logic
     // get deck: done at top
@@ -230,9 +227,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     // deal cards
     for(let i = 0; i < activePlayerIds.length; i++) {
       let cards = that.deck.deal(2);
-      that.hands[activePlayerIds[i]].push(cards[0]);
-      that.hands[activePlayerIds[i]].push(cards[1]);
+      that.hands[activePlayerIds[i]] = [cards[0], cards[1]];
     }
+    dispatchEvent(new RoundStartedEvent(smallBlind, dealer, that.hands));
+
     // pay blinds
 
     let sb = activePlayerIds[(activePlayerIds.indexOf(dealer.player_id) + 1) % activePlayerIds.length];
