@@ -64,7 +64,7 @@ var TextPlayer = function (name) {
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
       for(let i = 0; i < e.getFlippedCards().length; i++) {
-        allFlippedCards += " " + e.getFlippedCards()[i].getSuit() + e.getFlippedCards()[i].getRank();
+        allFlippedCards += " suit: " + e.getFlippedCards()[i].getSuit() + " rank: " + e.getFlippedCards()[i].getRank();
       }
       that.appendMessage("Turn started, flipped cards are " + allFlippedCards);
     });
@@ -72,27 +72,13 @@ var TextPlayer = function (name) {
     // Check for all commands here
     current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
       $(".turn").remove();
-
+      let temp = "";
+      for(let i = 0; i < current_round.hands[id].length; i++) {
+        temp += " suit: " + current_round.hands[id][i].getSuit() + " rank: " + current_round.hands[id][i].getRank();
+      }
+      current_round.hands[id]
       if(e.getBetter().player_id === id) {
-        that.appendMessage("Your turn - (budget: "+e.getBetter().actions.getBudget()+")");
-        // $("#consoleSubmit").on("click", function() {
-        //   let input = $("#pokerConsole").val();
-        //   if(input.substring(0,5) === "raise") {
-        //     let argList = input.split(' ');
-        //     if(argList.length === 2 && !isNaN(parseInt(argList[1]))) {
-        //       let number = parseInt(argList[1]);
-        //       current_round.raise(number, e.getBetter().player_id);
-        //     }
-        //   } else if(input === "call") {
-        //     current_round.call(e.getBetter().player_id);
-        //   } else if(input ==="fold") {
-        //     current_round.fold(e.getBetter().player_id);
-        //   } else if(input === "check"){
-        //     current_round.check(e.getBetter().player_id);
-        //   }else {
-        //     that.appendMessage("Invalid command");
-        //   }
-        // });
+        that.appendMessage("Your turn - (budget: "+e.getBetter().actions.getBudget()+") your cards ("+temp+")");
 
         $("#pokerConsole").on("keydown", function(event) {
           if(event.keyCode === 13) {
@@ -112,8 +98,6 @@ var TextPlayer = function (name) {
             } else if(input === "budget") {
               that.appendMessage(e.getBetter().getBudget());
             } else if(input === "hand") {
-              console.log(e.getBetter());
-              // console.log(current_round.players[e.getBetter().getId()].actions.getBudget());
             } else {
               that.appendMessage("Invalid command");
             }

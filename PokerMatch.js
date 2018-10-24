@@ -25,7 +25,6 @@ var PokerMatch = function (players, settings) {
     var count = 0;
     for(var i = 0; i < players.length; i++) {
 
-      //that.players[i].budget += e.round.getWinnings(that.players[i].player_id);
       if(that.players[i].budget === 0) {
         count++;
       }

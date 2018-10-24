@@ -34,9 +34,6 @@ var DumbAI = function (name) {
       });
 
       current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
-        // if(e.getBetter().player_id === id) {
-        //   current_round.call(id);
-        // }
         if(e.getBetter().player_id === id) {
             let action = e.getValidActions()[1+Math.floor(Math.random()*(e.getValidActions().length-1))];
             if(action.length === 2) {
@@ -57,9 +54,6 @@ var DumbAI = function (name) {
             } else {
               action(e.getBetter().player_id);
             }
-            // $("#callButton").on("click", function(e) {
-          //   current_round.call(id);
-          // });
         }
       });
 
