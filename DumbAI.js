@@ -60,6 +60,12 @@ var DumbAI = function (name) {
       });
 
       current_round.registerEventHandler(Poker.ERROR, function(e) {
-      })
+      //   if(e.getBetter().player_id === id) {
+      //   if(e.getError().substring(0,2) == "E0") {
+      //     current_round.call();
+      //     current_round.check();
+      //   }
+      // }
+      });
     }
   }
