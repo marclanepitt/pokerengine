@@ -35,17 +35,7 @@ var TextPlayer = function (name) {
   this.setupNextRound = function (round_of_poker, id) {
     current_round = round_of_poker;
     player_id = id;
-    current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
-      let dealer = e.getDealer();
-      $(".dealer").remove();
-      $(".player-"+dealer.getName()+dealer.player_id).append("<div class='dealer' style='display:inline-block'>Dealer</div>");
-      for(let i = 0; i < match.players.length; i++) {
-        $(".player-"+match.players[i].getName()+match.players[i].player_id).append(`<div class='cards'>`+ "R:" +
-        e.getHand(match.players[i].player_id)[0].getRank() + " S:" + e.getHand(match.players[i].player_id)[0].getSuit() + " " + "R:" +
-        e.getHand(match.players[i].player_id)[1].getRank() + " S:" + e.getHand(match.players[i].player_id)[1].getSuit() + `
-        </div>
-        `);
-      }
+    let allFlippedCards = "";
 
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
       that.appendMessage("ROUND STARTED");
@@ -68,8 +58,15 @@ var TextPlayer = function (name) {
 // >>>>>>> 8e3f730000e8a485b21b2fe7ba07ec4c65d13e95
     });
 
+    current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, function (e) {
+      that.appendMessage("Round Ended, ___ won ___ money")
+    });
+
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
-      console.log(e.getFlippedCards());
+      for(let i = 0; i < e.getFlippedCards().length; i++) {
+        allFlippedCards += " " + e.getFlippedCards()[i].getSuit() + e.getFlippedCards()[i].getRank();
+      }
+      that.appendMessage("Turn started, flipped cards are " + allFlippedCards);
     });
 
     // Check for all commands here
@@ -77,7 +74,7 @@ var TextPlayer = function (name) {
       $(".turn").remove();
 
       if(e.getBetter().player_id === id) {
-        that.appendMessage("Your turn");
+        that.appendMessage("Your turn - (budget: "+e.getBetter().actions.getBudget()+")");
         // $("#consoleSubmit").on("click", function() {
         //   let input = $("#pokerConsole").val();
         //   if(input.substring(0,5) === "raise") {
@@ -123,12 +120,14 @@ var TextPlayer = function (name) {
           }
         });
       } else {
-        that.appendMessage(e.getBetter().getName() + "'s turn");
+        that.appendMessage(e.getBetter().getName() + "'s turn - (budget: "+e.getBetter().actions.getBudget()+")");
       }
     });
 
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
+
+      that.appendMessage(e.getPreviousBetter().getName() + " " + e.getBetType())
       $("#pot").text(JSON.stringify(current_round.pot));
       console.log("bet ended");
 
@@ -136,12 +135,11 @@ var TextPlayer = function (name) {
     });
 
     current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, function (e) {
-      console.log("turn ended");
+      that.appendMessage("Turn ended");
     });
 
     current_round.registerEventHandler(Poker.ERROR, function (e) {
       console.log(e.getError());
     });
   }
-    )}
 }
