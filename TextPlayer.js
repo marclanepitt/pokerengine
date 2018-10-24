@@ -34,9 +34,9 @@ var TextPlayer = function (name) {
       $(".dealer").remove();
       $(".player-"+dealer.getName()+dealer.player_id).append("<div class='dealer' style='display:inline-block'>Dealer</div>");
       for(let i = 0; i < match.players.length; i++) {
-        $(".player-"+match.players[i].getName()+match.players[i].player_id).append(`<div class='cards'>`+
-        e.getHand(match.players[i].player_id)[0].getRank() + e.getHand(match.players[i].player_id)[0].getSuit() + 
-        e.getHand(match.players[i].player_id)[1].getRank() + e.getHand(match.players[i].player_id)[1].getSuit() + `
+        $(".player-"+match.players[i].getName()+match.players[i].player_id).append(`<div class='cards'>`+ "R:" +
+        e.getHand(match.players[i].player_id)[0].getRank() + " S:" + e.getHand(match.players[i].player_id)[0].getSuit() + " " + "R:" +
+        e.getHand(match.players[i].player_id)[1].getRank() + " S:" + e.getHand(match.players[i].player_id)[1].getSuit() + `
         </div>
         `);
       }

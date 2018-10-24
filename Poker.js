@@ -71,7 +71,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   var flipped_cards = [];
 
   var bet_index = 3;
-  var current_better = {};
+  var current_better = this.players[activePlayerIds[(activePlayerIds.indexOf(dealer.player_id) + 2) % activePlayerIds.length]];
 
   var terminatingPlayerId = activePlayerIds[(activePlayerIds.indexOf(dealer.player_id) + 2) % activePlayerIds.length];
 
@@ -150,8 +150,18 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   var resetBetTokens = function() {
-    for(var i = 0; i < players.length; i++) {
+    for(var i = 0; i < that.players.length; i++) {
       that.players[i].actions.resetHasBet();
+    }
+  }
+
+  var getNextActiveBetter = function(current_better_id) {
+    let next_player_id = that.players[(current_better_id + 1) % that.players.length].player_id;
+    console.log("Next Player Id: " + (current_better_id + 1) % that.players.length);
+    if(activePlayerIds.indexOf(next_player_id) === -1) {
+      return getNextActiveBetter(next_player_id);
+    } else {
+      return that.players[next_player_id];
     }
   }
 
@@ -164,7 +174,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
     current_turn++;
     if(current_turn != 1) {
-      bet_index = 1;
+      current_better = that.dealer;
     }
     if(current_turn === 5 || activePlayerIds.length === 1) {
       // check winner, add money
@@ -188,8 +198,11 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     console.log(that.pot);
     setTimeout(() => {
       var dealer_index = activePlayerIds.indexOf(that.dealer.player_id);
-      console.log("NEW BET - curr id: " + activePlayerIds[(dealer_index+bet_index)%activePlayerIds.length]);
-      current_better = players[activePlayerIds[(dealer_index+bet_index)%activePlayerIds.length]];
+      console.log("is dealer gone? " + (dealer_index==-1));
+      current_better = getNextActiveBetter(current_better.player_id);
+      console.log("NEW BET - curr id: " + current_better.player_id);
+
+      // current_better = players[activePlayerIds[(dealer_index+bet_index)%activePlayerIds.length]];
       //end turn and new turn if we reach terminating player
       if(current_better.player_id === terminatingPlayerId ) {
         dispatchEvent(new TurnEndedEvent());
@@ -278,12 +291,18 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       return;
     }
     if(current_better.actions.canBet()) {
+      var curr_bet_id = current_better.player_id;
+      var whos_next_in_active = (activePlayerIds.indexOf(current_better.player_id) + 1) % activePlayerIds.length;
       activePlayerIds.splice(activePlayerIds.indexOf(player_id),1); //out of round not game
-      console.log(activePlayerIds);
-      if(bet_index > activePlayerIds.length) {
-        console.log("bet adder: " + Math.floor(bet_index / activePlayerIds.length));
-        bet_index += Math.floor(bet_index / activePlayerIds.length);
-      }
+      // prevent next current_bet error
+      console.log("FOLD: getting dealer: " + activePlayerIds.indexOf(that.dealer.player_id));
+      console.log("FOLD: whos_next_in_active: " + whos_next_in_active);
+      bet_index = (whos_next_in_active - activePlayerIds.indexOf(that.dealer.player_id)) % activePlayerIds.length;
+      console.log("FOLD: changed bi to: " + bet_index);
+      // if(bet_index > activePlayerIds.length) {
+      //   console.log("bet adder: " + Math.floor(bet_index / activePlayerIds.length));
+      //   bet_index += Math.floor(bet_index / activePlayerIds.length) - 1;
+      // }
       dispatchEvent(new BetEndedEvent("fold", -1, current_better));
       current_better.actions.hasBet();
       return newBet();
