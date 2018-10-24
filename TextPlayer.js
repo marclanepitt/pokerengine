@@ -37,11 +37,25 @@ var TextPlayer = function (name) {
     player_id = id;
 
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
+<<<<<<< HEAD
       that.appendMessage("ROUND STARTED");
       that.appendMessage("Current dealer: " + e.getDealer().getName());
       // let dealer = e.getDealer();
       // $(".player-" + dealer.getName() + dealer.player_id).append("Dealer");
       // console.log(e.getHand(id))
+=======
+      let dealer = e.getDealer();
+      $(".dealer").remove();
+      $(".player-"+dealer.getName()+dealer.player_id).append("<div class='dealer' style='display:inline-block'>Dealer</div>");
+      for(let i = 0; i < match.players.length; i++) {
+        $(".player-"+match.players[i].getName()+match.players[i].player_id).append(`<div class='cards'>`+
+        e.getHand(match.players[i].player_id)[0].getRank() + e.getHand(match.players[i].player_id)[0].getSuit() + 
+        e.getHand(match.players[i].player_id)[1].getRank() + e.getHand(match.players[i].player_id)[1].getSuit() + `
+        </div>
+        `);
+      }
+
+>>>>>>> 8e3f730000e8a485b21b2fe7ba07ec4c65d13e95
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
