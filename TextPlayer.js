@@ -12,71 +12,94 @@ var TextPlayer = function (name) {
     match = poker_match;
     for(let i = 0; i < match.players.length; i++) {
       let playerName = match.players[i].getName();
-      let playerEl = `<div class='player player-`+playerName+i+`'>
-      `+playerName+`
-      (Money: <div class="money" style="display:inline-block">`+ match.players[i].actions.getBudget() +`</div>)
-      </div>`;
-      $("#matchWrapper").append([playerEl]);
+      // let playerEl = `<div class='player player-`+playerName+i+`'>
+      // `+playerName+`
+      // (Money: <div class="money" style="display:inline-block">`+ match.players[i].actions.getBudget() +`</div>)
+      // </div>`;
+      let playerMessage = "Created player: " + playerName;
+      this.appendMessage(playerMessage);
     }
 
-    let pot = $("<div id='pot'></div>");
-    $("body").append(pot);
+    // let pot = $("<div id='pot'></div>");
+    // $("body").append(pot);
+  }
+
+  this.appendMessage = function (message) {
+    $('#messageLog').append('<p>' + message + '</p>');
   }
 
   this.getName = function () {
     return name;
   }
+
   this.setupNextRound = function (round_of_poker, id) {
     current_round = round_of_poker;
     player_id = id;
+
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
-      let dealer = e.getDealer();
-      $(".player-"+dealer.getName()+dealer.player_id).append("Dealer");
-      console.log(e.getHand(id))
+      that.appendMessage("ROUND STARTED");
+      that.appendMessage("Current dealer: " + e.getDealer().getName());
+      // let dealer = e.getDealer();
+      // $(".player-" + dealer.getName() + dealer.player_id).append("Dealer");
+      // console.log(e.getHand(id))
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
       console.log(e.getFlippedCards());
-
     });
 
+    // Check for all commands here
     current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
-      console.log("bet started");
-
       $(".turn").remove();
-      $(".player-"+e.getBetter().getName()+e.getBetter().player_id).append("<div class='turn'>Your turn</div>");
 
       if(e.getBetter().player_id === id) {
-        $("#consoleSubmit").on("click", function() {
-          let input = $("#pokerConsole").val();
-          if(input.substring(0,6) === "raise(" && input[input.length-1] === ")" ) {
-              let number = parseInt(input.substring(6,input.length-1));
-              current_round.raise(number, e.getBetter().player_id);
-          } else if(input === "call()") {
+        that.appendMessage("Your turn");
+        // $("#consoleSubmit").on("click", function() {
+        //   let input = $("#pokerConsole").val();
+        //   if(input.substring(0,5) === "raise") {
+        //     let argList = input.split(' ');
+        //     if(argList.length === 2 && !isNaN(parseInt(argList[1]))) {
+        //       let number = parseInt(argList[1]);
+        //       current_round.raise(number, e.getBetter().player_id);
+        //     }
+        //   } else if(input === "call") {
+        //     current_round.call(e.getBetter().player_id);
+        //   } else if(input ==="fold") {
+        //     current_round.fold(e.getBetter().player_id);
+        //   } else if(input === "check"){
+        //     current_round.check(e.getBetter().player_id);
+        //   }else {
+        //     that.appendMessage("Invalid command");
+        //   }
+        // });
+
+        $("#pokerConsole").on("keydown", function(event) {
+          if(event.keyCode === 13) {
+            let input = $("#pokerConsole").val();
+            if(input.substring(0,5) === "raise") {
+              let argList = input.split(' ');
+              if(argList.length === 2 && !isNaN(parseInt(argList[1]))) {
+                let number = parseInt(argList[1]);
+                current_round.raise(number, e.getBetter().player_id);
+              }
+            } else if(input === "call") {
               current_round.call(e.getBetter().player_id);
-          } else if(input ==="fold()") {
+            } else if(input ==="fold") {
               current_round.fold(e.getBetter().player_id);
-          } else if(input === "check()"){
+            } else if(input === "check"){
               current_round.check(e.getBetter().player_id);
-          }else {
-            $("#pokerConsole").val("invalid command");
+            } else if(input === "budget") {
+              that.appendMessage(e.getBetter().getBudget());
+            } else if(input === "hand") {
+              console.log(e.getBetter());
+              // console.log(current_round.players[e.getBetter().getId()].actions.getBudget());
+            } else {
+              that.appendMessage("Invalid command");
+            }
           }
         });
-        $("#pokerConsole").change(function() {
-          let input = $("#pokerConsole").val();
-          if(input.substring(0,6) === "raise(" && input[input.length-1] === ")" ) {
-              let number = parseInt(input.substring(6,input.length-1));
-              current_round.raise(number, e.getBetter().player_id);
-          } else if(input === "call()") {
-              current_round.call(e.getBetter().player_id);
-          } else if(input ==="fold()") {
-              current_round.fold(e.getBetter().player_id);
-          } else if(input === "check()"){
-              current_round.check(e.getBetter().player_id);
-          }else {
-            $("#pokerConsole").val("invalid command");
-          }
-        });
+      } else {
+        that.appendMessage(e.getBetter().getName() + "'s turn");
       }
     });
 
@@ -85,7 +108,7 @@ var TextPlayer = function (name) {
       $("#pot").text(JSON.stringify(current_round.pot));
       console.log("bet ended");
 
-        $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
+      $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
     });
 
     current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, function (e) {

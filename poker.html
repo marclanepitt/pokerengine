@@ -18,23 +18,40 @@
     <script src="TextPlayer.js"></script>
     <script>
         $(document).ready(function(){
-        var textplayer = new TextPlayer("a");
-        var ai = new DumbAI("b");
-        var ai1 = new DumbAI("c");
-        var ai2 = new DumbAI("d");
+            $('#usernameEnter').click(function() {
+                let username = $('#usernameInput').val();
+                if(username === '') {
+                    console.log('Invalid username');
+                } else {
+                    $('#usernameConsole').hide();
+                    $('#matchConsole').show();
 
-        var players = [textplayer,ai,ai1,ai2]
-        var match = new PokerMatch(players, {});
+                    var textplayer = new TextPlayer(username);
+                    var ai = new DumbAI("b");
+                    var ai1 = new DumbAI("c");
+                    var ai2 = new DumbAI("d");
 
-        match.run();
+                    var players = [textplayer,ai,ai1,ai2]
+                    var match = new PokerMatch(players, {});
+
+                    match.run();
+                }
+            });
         });
     </script>
 </head>
 <body>
     <!-- <input type="text" id="betAmount"> -->
     <div id="matchWrapper">
-        <input type="text" id="pokerConsole">
-        <button id="consoleSubmit">Enter</button>
+        <div id="messageLog"></div>
+        <div id="matchConsole">
+            <input type="text" id="pokerConsole">
+            <button id="consoleSubmit">Enter</button>
+        </div>
+        <div id="usernameConsole">
+            <input type="text" id="usernameInput" placeholder="Username">
+            <button id="usernameEnter">Enter</button>
+        </div>
     </div>
 
 </body>
