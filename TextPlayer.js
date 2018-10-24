@@ -35,7 +35,6 @@ var TextPlayer = function (name) {
   this.setupNextRound = function (round_of_poker, id) {
     current_round = round_of_poker;
     player_id = id;
-<<<<<<< HEAD
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
       let dealer = e.getDealer();
       $(".dealer").remove();
@@ -47,11 +46,8 @@ var TextPlayer = function (name) {
         </div>
         `);
       }
-=======
->>>>>>> d498e84b5c0da96e72d13122121174f64d2bb716
 
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
-<<<<<<< HEAD
       that.appendMessage("ROUND STARTED");
       that.appendMessage("Current dealer: " + e.getDealer().getName());
       // let dealer = e.getDealer();
@@ -147,4 +143,5 @@ var TextPlayer = function (name) {
       console.log(e.getError());
     });
   }
+    )}
 }
