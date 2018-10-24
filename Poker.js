@@ -58,6 +58,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   this.pot = {};
 
   this.hands = {};
+  this.allFlippedCards = [];
 
   var activePlayerIds = [];
   for(let i = 0; i < players.length; i++) {
@@ -174,7 +175,13 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         dispatchEvent(new RoundEndedEvent());
         return;
       }
-      dispatchEvent(new TurnStartedEvent(current_turn));
+
+      let flippedCards = that.deck.deal(current_turn === 2 ? 3 : 1); 
+      for(let i = 0; i < flippedCards.length; i++) {
+        that.allFlippedCards.push(flippedCards[i]);
+      }
+
+      dispatchEvent(new TurnStartedEvent(current_turn, flippedCards));
       return newBet();
   }
 
@@ -211,7 +218,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   this.startRound = function() {
-    dispatchEvent(new RoundStartedEvent(smallBlind, dealer));
+    dispatchEvent(new RoundStartedEvent(smallBlind, dealer, that.hands));
 
     // need pre-flop logic
     // get deck: done at top
@@ -221,7 +228,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     // deal cards
     for(let i = 0; i < activePlayerIds.length; i++) {
       let cards = that.deck.deal(2);
-      that.hands[activePlayerIds[i]].push(cards);
+      that.hands[activePlayerIds[i]].push(cards[0]);
+      that.hands[activePlayerIds[i]].push(cards[1]);
     }
     // pay blinds
 
@@ -502,7 +510,7 @@ var BetEndedEvent = function(bet_type, bet_amount, player) {
   }
 }
 
-var RoundStartedEvent = function(smallBlind, dealer) {
+var RoundStartedEvent = function(smallBlind, dealer, hands) {
   this.event_type = Poker.ROUND_STARTED_EVENT;
   this.getSmallBlind = function() {
     return smallBlind; //should we return player?
@@ -515,6 +523,11 @@ var RoundStartedEvent = function(smallBlind, dealer) {
   this.getDealer = function() {
     return dealer;
   }
+
+  this.getHand = function(player_id) {
+    return hands[player_id];
+  }
+
 }
 
 var RoundEndedEvent = function() {
@@ -525,18 +538,18 @@ var RoundEndedEvent = function() {
 }
 
 // changed flipped cards from being parameter to function
-var TurnStartedEvent = function(state) {
+var TurnStartedEvent = function(state,flippedCards) {
   this.event_type = Poker.TURN_STARTED_EVENT;
-  // var flippedCards = deck.getNextCards(state);
+
   this.getTurnState = function() {
     switch(state) {
-      case 0:
-      return "pre flop"
       case 1:
-      return "flop";
+      return "pre flop"
       case 2:
-      return "turn";
+      return "flop";
       case 3:
+      return "turn";
+      case 4:
       return "river";
     }
   }

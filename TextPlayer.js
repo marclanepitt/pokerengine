@@ -32,11 +32,11 @@ var TextPlayer = function (name) {
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
       let dealer = e.getDealer();
       $(".player-"+dealer.getName()+dealer.player_id).append("Dealer");
-
+      console.log(e.getHand(id))
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
-      console.log("turn started");
+      console.log(e.getFlippedCards());
 
     });
 
