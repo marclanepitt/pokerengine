@@ -39,16 +39,11 @@ var DumbAI = function (name) {
             if(action.length === 2) {
               let maxBet  = getMax(current_round.pot);
               let aiPot = current_round.pot[id];
-              console.log("comp to raise : " + (maxBet-aiPot+1));
               let amt_to_raise = (maxBet-aiPot)+1;
-              console.log(e.getBetter().actions.budget);
-              console.log(amt_to_raise);
               if(amt_to_raise <= e.getBetter().actions.budget - (maxBet - aiPot)) {
                 action((maxBet-aiPot)+1, e.getBetter().player_id);
               } else {
                 // if bet is too high, call/check
-                console.log('bet averted - check/call instead');
-                console.log(e.getValidActions()[2]);
                 e.getValidActions()[2](e.getBetter().player_id);
               }
             } else {
@@ -58,18 +53,9 @@ var DumbAI = function (name) {
       });
 
       current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
-        if(e.getPreviousBetter().player_id === id) {
-          console.log(e.getBetType());
-        }
       });
 
       current_round.registerEventHandler(Poker.ERROR, function(e) {
-      //   if(e.getBetter().player_id === id) {
-      //   if(e.getError().substring(0,2) == "E0") {
-      //     current_round.call();
-      //     current_round.check();
-      //   }
-      // }
       });
     }
   }

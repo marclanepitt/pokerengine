@@ -12,20 +12,14 @@ var TextPlayer = function (name) {
     match = poker_match;
     for(let i = 0; i < match.players.length; i++) {
       let playerName = match.players[i].getName();
-      // let playerEl = `<div class='player player-`+playerName+i+`'>
-      // `+playerName+`
-      // (Money: <div class="money" style="display:inline-block">`+ match.players[i].actions.getBudget() +`</div>)
-      // </div>`;
       let playerMessage = "Created player: " + playerName;
       this.appendMessage(playerMessage);
     }
-
-    // let pot = $("<div id='pot'></div>");
-    // $("body").append(pot);
   }
 
   this.appendMessage = function (message) {
     $('#messageLog').append('<p>' + message + '</p>');
+    $('#messageLog').animate({scrollTop:$('#messageLog')[0].scrollHeight});
   }
 
   this.getName = function () {
@@ -40,22 +34,6 @@ var TextPlayer = function (name) {
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
       that.appendMessage("ROUND STARTED");
       that.appendMessage("Current dealer: " + e.getDealer().getName());
-      // let dealer = e.getDealer();
-      // $(".player-" + dealer.getName() + dealer.player_id).append("Dealer");
-      // console.log(e.getHand(id))
-// =======
-//       let dealer = e.getDealer();
-//       $(".dealer").remove();
-//       $(".player-"+dealer.getName()+dealer.player_id).append("<div class='dealer' style='display:inline-block'>Dealer</div>");
-//       for(let i = 0; i < match.players.length; i++) {
-//         $(".player-"+match.players[i].getName()+match.players[i].player_id).append(`<div class='cards'>`+
-//         e.getHand(match.players[i].player_id)[0].getRank() + e.getHand(match.players[i].player_id)[0].getSuit() + 
-//         e.getHand(match.players[i].player_id)[1].getRank() + e.getHand(match.players[i].player_id)[1].getSuit() + `
-//         </div>
-//         `);
-//       }
-
-// >>>>>>> 8e3f730000e8a485b21b2fe7ba07ec4c65d13e95
     });
 
     current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, function (e) {
@@ -113,8 +91,6 @@ var TextPlayer = function (name) {
 
       that.appendMessage(e.getPreviousBetter().getName() + " " + e.getBetType())
       $("#pot").text(JSON.stringify(current_round.pot));
-      console.log("bet ended");
-
       $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
     });
 
@@ -123,7 +99,7 @@ var TextPlayer = function (name) {
     });
 
     current_round.registerEventHandler(Poker.ERROR, function (e) {
-      console.log(e.getError());
+      that.appendMessage("ERROR: " + e.getError());
     });
   }
 }

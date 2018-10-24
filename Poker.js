@@ -170,6 +170,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
   }
 
+  var isValidAction = function(bet_action) {
+    return getValidActions().includes(bet_action);
+  }
+
   var newTurn = function() {
     if(current_turn != 0) {
       terminatingPlayerId = null;
@@ -190,7 +194,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(current_turn === 5) {
       let winner = that.evaluateWinner();
       winner.player.actions.addBudget(getTotalPot());
-      console.log(winner.player)
       dispatchEvent(new RoundEndedEvent(winner.player, getTotalPot(), winner.type));
       return;
     }
@@ -219,8 +222,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       if(activePlayerIds.indexOf(terminatingPlayerId) === -1) {
         terminatingPlayerId = getNextActiveBetter(terminatingPlayerId).player_id;
       }
-      console.log("terminating player:" + players[terminatingPlayerId].getName());
-      console.log("current better: "+current_better.getName())
       dispatchEvent(new BetStartedEvent(current_better, getValidActions()));
     }, 500);
   }
@@ -271,6 +272,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;
     }
+    if(!isValidAction(that.raise)) {
+      dispatchEvent(new Error("Not a valid bet action"));
+      return;
+    }
 
     if(current_better.actions.canBet()) {
       if(getMaxBet() - that.pot[current_better.player_id] + bet_amount > current_better.actions.getBudget()) {
@@ -297,8 +302,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;
     }
+    if(!isValidAction(that.fold)) {
+      dispatchEvent(new Error("Not a valid bet action"));
+      return;
+    }
     if(current_better.actions.canBet()) {
-     
+
       activePlayerIds.splice(activePlayerIds.indexOf(player_id),1); //out of round not game
       // prevent next current_bet error
 
@@ -315,9 +324,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;
     }
-    // if(!getValidActions().includes(this.check)) {
-    //   dispatchEvent(new Error("Not a valid bet action"));
-    // }
+    if(!isValidAction(that.check)) {
+      dispatchEvent(new Error("Not a valid bet action"));
+      return;
+    }
     if(current_better.actions.canBet()) {
       dispatchEvent(new BetEndedEvent("check", 0, current_better));
       current_better.actions.hasBet();
@@ -332,9 +342,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;
     }
-    // if(!getValidActions().includes(this.call)) {
-    //   dispatchEvent(new Error("Not a valid bet action"));
-    // }
+    if(!isValidAction(that.call)) {
+      dispatchEvent(new Error("Not a valid bet action"));
+      return;
+    }
     if(current_better.actions.canBet()) {
       if(current_better.actions.getBudget() < getMaxBet() - that.pot[current_better.player_id])  {
         that.pot[current_better.player_id] += current_better.actions.getBudget();
