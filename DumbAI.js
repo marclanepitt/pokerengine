@@ -42,9 +42,7 @@ var DumbAI = function (name) {
             if(action.length === 2) {
               let maxBet  = getMax(current_round.pot);
               let aiPot = current_round.pot[id];
-              console.log("mb: " + maxBet);
-              console.log("ai_p: " + aiPot);
-              console.log("diff: " + (maxBet-aiPot));
+              console.log("comp to raise : " + (maxBet-aiPot+1));
               action((maxBet-aiPot)+1, e.getBetter().player_id);
             } else {
               action(e.getBetter().player_id);

@@ -154,34 +154,41 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
   }
 
-  var newTurn = function() {
-      if(current_turn != 0) {
-        terminatingPlayerId = null;
-      }
-      for(var i = 0; i < players.length; i++) {
-        that.players[i].actions.resetHasBet();
-      }
+  var resetBetTokens = function() {
+    for(var i = 0; i < players.length; i++) {
+      that.players[i].actions.resetHasBet();
+    }
+  }
 
-      current_turn++;
-      if(current_turn != 1) {
-        bet_index = 1;
-      }
-      if(current_turn === 5) {
-        // check winner, add money
-        // winner <- activeHands.evaluate();
-        // winner.addBudget(that.pot.total);
-        // if(gameOverCheck(players)) dispatch(GAME_OVER_EVENT)
-        dispatchEvent(new RoundEndedEvent());
-        return;
-      }
-      dispatchEvent(new TurnStartedEvent(current_turn));
-      return newBet();
+  var newTurn = function() {
+    if(current_turn != 0) {
+      terminatingPlayerId = null;
+    }
+
+    resetBetTokens();
+
+    current_turn++;
+    if(current_turn != 1) {
+      bet_index = 1;
+    }
+    if(current_turn === 5 || activePlayerIds.length === 1) {
+      // check winner, add money
+      // winner <- activeHands.evaluate();
+      // winner.addBudget(that.pot.total);
+      // if(gameOverCheck(players)) dispatch(GAME_OVER_EVENT)
+      dispatchEvent(new RoundEndedEvent());
+      return;
+    }
+    dispatchEvent(new TurnStartedEvent(current_turn));
+    return newBet();
   }
 
   var newBet = function() {
     console.log(that.pot);
     setTimeout(() => {
       var dealer_index = activePlayerIds.indexOf(that.dealer.player_id);
+      console.log("NEW BET - curr id: " + (dealer_index+bet_index)%activePlayerIds.length);
+      console.log(players[activePlayerIds[(dealer_index+bet_index)%activePlayerIds.length]]);
       current_better = players[activePlayerIds[(dealer_index+bet_index)%activePlayerIds.length]];
       //end turn and new turn if we reach terminating player
       if(current_better.player_id === terminatingPlayerId ) {
@@ -245,18 +252,17 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
 
     if(current_better.actions.canBet()) {
-      console.log(getMaxBet() - that.pot[current_better.player_id] + bet_amount);
-      console.log(current_better.actions.getBudget());
       if(getMaxBet() - that.pot[current_better.player_id] + bet_amount > current_better.actions.getBudget()) {
         // not enough money case
         dispatchEvent(new Error("Insufficent funds to raise"));
       } else {
         // bet case
         terminatingPlayerId = current_better.player_id;
-        that.pot[current_better.player_id] += (getMaxBet() - that.pot[current_better.player_id]) + bet_amount;
-
-        current_better.actions.subBudget((getMaxBet() - that.pot[current_better.player_id]) + bet_amount);
+        var curr_pot_diff = getMaxBet() - that.pot[current_better.player_id];
+        that.pot[current_better.player_id] += curr_pot_diff + bet_amount;
+        current_better.actions.subBudget(curr_pot_diff + bet_amount);
         dispatchEvent(new BetEndedEvent("bet", (getMaxBet() - that.pot[current_better.player_id]) + bet_amount, current_better));
+        resetBetTokens();
         current_better.actions.hasBet();
         return newBet();
       }
@@ -272,10 +278,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
     if(current_better.actions.canBet()) {
       activePlayerIds.splice(activePlayerIds.indexOf(player_id),1); //out of round not game
-
+      console.log(activePlayerIds);
       dispatchEvent(new BetEndedEvent("fold", -1, current_better));
       current_better.actions.hasBet();
       return newBet();
+    } else {
+      dispatchEvent(new Error("Not your turn to make bet action"));
     }
   }
 
@@ -288,6 +296,8 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatchEvent(new BetEndedEvent("check", 0, current_better));
       current_better.actions.hasBet();
       return newBet();
+    } else {
+      dispatchEvent(new Error("Not your turn to make bet action"));
     }
   }
 
@@ -297,18 +307,19 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       return;
     }
     if(current_better.actions.canBet()) {
-
       if(current_better.actions.getBudget() - that.pot[current_better.player_id] < getMaxBet())  {
         that.pot[current_better.player_id] += current_better.actions.getBudget();
-        dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better));
         current_better.actions.setBudget(0);
+        dispatchEvent(new BetEndedEvent("call", current_better.actions.getBudget(), current_better));
       } else {
-        that.pot[current_better.player_id] += (getMaxBet() - that.pot[current_better.player_id]);
         current_better.actions.subBudget(getMaxBet() - that.pot[current_better.player_id]);
+        that.pot[current_better.player_id] += (getMaxBet() - that.pot[current_better.player_id]);
         dispatchEvent(new BetEndedEvent("call", getMaxBet() - that.pot[current_better.player_id], current_better));
       }
       current_better.actions.hasBet();
       return newBet();
+    } else {
+      dispatchEvent(new Error("Not your turn to make bet action"));
     }
   }
 
