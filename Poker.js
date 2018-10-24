@@ -99,6 +99,14 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return max;
   }
 
+  var getTotalPot = function() {
+    let total = 0;
+    for(var player in that.pot) {
+      total += that.pot[player];
+    }
+    return total;
+  }
+
   var dispatchEvent = function (e) {
     if (dispatching) {
       dispatch_queue.push(e);
@@ -173,12 +181,17 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(current_turn != 1) {
       current_better = that.dealer;
     }
-    if(current_turn === 5 || activePlayerIds.length === 1) {
-      // check winner, add money
-      // winner <- activeHands.evaluate();
-      // winner.addBudget(that.pot.total);
-      // if(gameOverCheck(players)) dispatch(GAME_OVER_EVENT)
-      dispatchEvent(new RoundEndedEvent());
+
+    if(activePlayerIds.length === 1) {
+      that.players[activePlayerIds[0]].actions.addBudget(getTotalPot());
+      return dispatchEvent(new RoundEndedEvent(that.players[activePlayerIds[0]], getTotalPot(), "Everyone folded"))
+    }
+
+    if(current_turn === 5) {
+      let winner = that.evaluateWinner();
+      winner.player.actions.addBudget(getTotalPot());
+      console.log(winner.player)
+      dispatchEvent(new RoundEndedEvent(winner.player, getTotalPot(), winner.type));
       return;
     }
 
@@ -344,26 +357,18 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   this.evaluateWinner = function() {
-    // Get a subset of all players that need to be evaluated
-    var validPlayers = [];
-    for(let i = 0; i < that.players.length; i++) {
-      if(that.players[i].active) {
-        validPlayers.push(that.players[i]);
-      }
-    }
-
     // TODO: fix this function to implement current cards on the table
     // Keep NULL player object for results below
-    let tableCards = null;
+    let tableCards = that.allFlippedCards;
     let best = new PokerHandResult(tableCards, null, 'none', 0);
 
-    for(let i = 0; i < that.validPlayers.length; i++) {
+    for(let i = 0; i < activePlayerIds.length; i++) {
       // Combine table cards with the player's cards
-      let allCards = tableCards.concat(that.validPlayers[i].hand);
+      let allCards = tableCards.concat(that.hands[activePlayerIds[i]]);
 
       for(let combination of _combinations(allCards, 5)) {
         // Calculate value of best 5 cards
-        let result = _calculate(combination, validPlayers[i]);
+        let result = _calculate(combination, that.players[activePlayerIds[i]]);
         if(result.value > best.value) {
           best = result;
         }
@@ -373,7 +378,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return best;
   }
 
-  var _combinations = function (cards, group) {
+  var _combinations = function (cards, groups) {
     // Double array of card combinations
     let result = [];
 
@@ -386,7 +391,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
 
     // One card in each group
-    if(group === 1) {
+    if(groups === 1) {
       return cards.map((card) => [card]);
     }
 
@@ -395,18 +400,18 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       let head = cards.slice(i, i + 1);
       let tails = _combinations(cards.slice(i + 1), groups - 1);
       for(let tail of tails) {
-        results.push(head.concat(tail));
+        result.push(head.concat(tail));
       }
     }
 
-    return results;
+    return result;
   }
 
   var _calculate = function(cards, player) {
     // Check for card rank and whether it's a flush or straight
     let ranked = _ranked(cards);
     let isFlush = _isFlush(cards);
-    let isStraight = _isStraight(cards);
+    let isStraight = _isStraight(ranked);
 
     if (isStraight && isFlush && ranked[0][0].rank == 14) {
       return new PokerHandResult(cards, player, 'royal flush', _calculateValue(ranked, 9));
@@ -436,13 +441,16 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     // 2D array of cards, sorted by rank and number of cards in that rank
     let result = [];
 
+    for(let i = 2; i <= 14; i++) {
+      result.push([]);
+    }
     for (let card of cards) {
       let r = _ranks.indexOf(card.getRank());
       result[r].push(card);
     }
 
     // Condense results
-    result = result.filter((rank) => !!rank);
+    result = result.filter((rank) => !(rank.length === 0));
 
     // High to low
     result.reverse();
@@ -451,11 +459,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     result.sort((a, b) => {
       return a.length > b.length ? -1 : a.length < b.length ? 1 : 0;
     });
+    return result;
   }
 
   // Will work regardless of refactoring of Card.js
   var _isFlush = function(cards) {
-    let suit = cards[0][0].getSuit();
+    let suit = cards[0].getSuit();
 
     for (let card of cards) {
       if(card.getSuit() !== suit) {
@@ -466,12 +475,12 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return true;
   }
 
-  var _isStraight = function(cards) {
+  var _isStraight = function(ranked) {
     // Must have 5 different ranks
-    if(!cards[4]) { return false; }
+    if(!ranked[4]) { return false; }
 
     // Edge case for ace card, ACE = 14
-    if(cards[0][0].getRank() === 14 && cards[1][0].getRank() === 5 && cards[4][0] === 2) {
+    if(ranked[0][0].getRank() === 14 && ranked[1][0].getRank() === 5 && ranked[4][0] === 2) {
       // Ace is low, 5 is high
       ranked.push(ranked.shift());
       return true;
@@ -548,10 +557,20 @@ var RoundStartedEvent = function(smallBlind, dealer, hands) {
   }
 }
 
-var RoundEndedEvent = function() {
+var RoundEndedEvent = function(winner, winnings, type) {
   this.event_type = Poker.ROUND_ENDED_EVENT;
 
-  //who won
+  this.getWinner = function() {
+    return winner;
+  }
+
+  this.getWinnings = function() {
+    return winnings;
+  }
+
+  this.getType = function() {
+    return type;
+  }
 
 }
 

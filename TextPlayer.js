@@ -59,7 +59,7 @@ var TextPlayer = function (name) {
     });
 
     current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, function (e) {
-      that.appendMessage("Round Ended, ___ won ___ money")
+      that.appendMessage("Round Ended, "+e.getWinner().actions.getName()+" won " + e.getWinnings() + " money with a " + e.getType())
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {

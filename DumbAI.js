@@ -38,7 +38,7 @@ var DumbAI = function (name) {
         //   current_round.call(id);
         // }
         if(e.getBetter().player_id === id) {
-            let action = e.getValidActions()[Math.floor(Math.random()*e.getValidActions().length)];
+            let action = e.getValidActions()[1+Math.floor(Math.random()*(e.getValidActions().length-1))];
             if(action.length === 2) {
               let maxBet  = getMax(current_round.pot);
               let aiPot = current_round.pot[id];
