@@ -1,6 +1,6 @@
 /*
  *  COMP 426 - Fall 2018
- *  Object model for Player
+ *  Object model of player
  *
  */
 

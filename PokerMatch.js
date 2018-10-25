@@ -1,3 +1,9 @@
+/*
+ *  COMP 426 - Fall 2018
+ *  Set up poker game
+ *
+ */
+
 var PokerMatch = function (players, settings) {
   defaultSettings = {
     startingBudget:100,
@@ -87,7 +93,5 @@ var PokerMatch = function (players, settings) {
     this.getWinner = function() {
       return winner;
     }
-
   }
-
 }

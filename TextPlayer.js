@@ -1,4 +1,10 @@
-var TextPlayer = function (name) {
+/*
+ *  COMP 426 - Fall 2018
+ *  basic UI
+ *
+ */
+
+ var TextPlayer = function (name) {
   this.actions = new Player(name);
 
   var match = null;

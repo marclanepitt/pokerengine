@@ -1,11 +1,6 @@
-/* Game of Hearts model object. */
-
 /*
-* OBJECTS:
-* Poker
-* RoundOfPoker
-* -pot
-*
+*  COMP 426 - Fall 2018
+* Game of Hearts model object
 *
 * Events:
 *  startRound
@@ -16,12 +11,12 @@
 *  TurnStartedEvent
 *  TurnEndedEvent
 *
-* Functions:
+* Game functions:
 *  startRound
 *  newTurn
 *  newBet
 *
-* Bet Action Functions:
+* Bet action functions:
 *   raise
 *   fold
 *   check
@@ -37,7 +32,11 @@
 *   isBetter
 *   payBlind
 *   getPlayerId
-*
+*   endRoundAllButOneFolded
+*   endRoundAllCardsFlopped
+*   endRoundPlayersHaveNoMoney
+*   allPlayersAllIn
+*   dealCardsAndPush
 *
 */
 
