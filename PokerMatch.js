@@ -20,16 +20,19 @@ var PokerMatch = function (players, settings) {
 
   var that = this;
 
+  var round_track = {};
+
   var round_end_handler = function (e) {
-    console.log("Round ended");
     var count = 0;
     for(var i = 0; i < players.length; i++) {
 
-      if(that.players[i].budget === 0) {
+      if(that.players[i].actions.getBudget() === 0) {
+        that.players[i].actions.deactivate();
         count++;
       }
     }
     if(count === that.players.length -1) {
+      round_track.dispatchEventHack(new GameOverEvent(e.getWinner()));
       return;
       //match over
     }
@@ -40,14 +43,17 @@ var PokerMatch = function (players, settings) {
     if(roundCount % 3 === 0) {
       smallBlind = smallBlind * 2;
     }
+
     var activePlayers = [];
-    for(let i = 0; i < that.players.length; i++) {
-      if(that.players[i].actions.getActiveStatus()) {
-        activePlayers.push(that.players[i]);
+    for(let i = 0; i < players.length; i++) {
+      if(players[i].actions.getActiveStatus()) {
+        activePlayers.push(players[i]);
       }
     }
+
     var dealer = activePlayers[roundCount % activePlayers.length];
     var next_round = new RoundOfPoker(smallBlind, dealer, that.players);
+    round_track = next_round;
 
     round_setup_handlers.forEach(function (callback) {
       callback(next_round);
@@ -74,4 +80,14 @@ var PokerMatch = function (players, settings) {
   this.registerRoundSetupHandler = function(callback) {
     round_setup_handlers.push(callback);
   }
+
+  var GameOverEvent = function(winner) {
+    this.event_type = Poker.GAME_OVER_EVENT;
+
+    this.getWinner = function() {
+      return winner;
+    }
+
+  }
+
 }

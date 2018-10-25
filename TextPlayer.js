@@ -51,10 +51,9 @@ var TextPlayer = function (name) {
     current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
       $(".turn").remove();
       let temp = "";
-      for(let i = 0; i < current_round.hands[id].length; i++) {
-        temp += " suit: " + current_round.hands[id][i].getSuit() + " rank: " + current_round.hands[id][i].getRank();
+      for(let i = 0; i < current_round.hands[e.getBetter().player_id].length; i++) {
+        temp += " suit: " + current_round.hands[e.getBetter().player_id][i].getSuit() + " rank: " + current_round.hands[id][i].getRank();
       }
-      current_round.hands[id]
       if(e.getBetter().player_id === id) {
         that.appendMessage("Your turn - (budget: "+e.getBetter().actions.getBudget()+") your cards ("+temp+")");
 
@@ -89,7 +88,7 @@ var TextPlayer = function (name) {
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
 
-      that.appendMessage(e.getPreviousBetter().getName() + " " + e.getBetType() + " " + e.getBetAmount())
+      that.appendMessage(e.getPreviousBetter().getName() + " " + e.getBetType())
       $("#pot").text(JSON.stringify(current_round.pot));
       $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
     });
@@ -98,10 +97,13 @@ var TextPlayer = function (name) {
       that.appendMessage("Turn ended");
     });
 
+    current_round.registerEventHandler(Poker.GAME_OVER_EVENT, function(e) {
+      that.appendMessage(e.getWinner().actions.getName() + " won the whole thing");
+    });
+
     current_round.registerEventHandler(Poker.ERROR, function (e) {
-      if(e.getPlayerId() === id) {
-        that.appendMessage("ERROR: " + e.getError());
-      }
+        // that.appendMessage("ERROR: " + e.getError());
+        console.log(e.getError());
     });
   }
 }
