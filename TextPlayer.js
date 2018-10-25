@@ -1,6 +1,6 @@
 /*
  *  COMP 426 - Fall 2018
- *  basic UI
+ *  Basic UI
  *
  */
 
@@ -44,31 +44,26 @@
     });
 
     current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, function (e) {
-      that.appendMessage("Round Ended, "+e.getWinner().actions.getName()+" won $" + e.getWinnings() + " with " + e.getType())
+      that.appendMessage("Round Ended, " + e.getWinner().actions.getName() + " won $" + e.getWinnings() + " with " + e.getType());
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
       for(let i = 0; i < e.getFlippedCards().length; i++) {
-        allFlippedCards += " suit: " + e.getFlippedCards()[i].getSuit() + " rank: " + e.getFlippedCards()[i].getRank();
+        allFlippedCards += '<br />';
+        allFlippedCards += e.getFlippedCards()[i].toString();
       }
+
       if(allFlippedCards.length != 0) {
-        that.appendMessage("Turn started, flipped cards are " + allFlippedCards);
+        that.appendMessage("Turn started, flipped cards are:" + allFlippedCards);
       } else {
         that.appendMessage("Turn started, preflop (no flipped cards)");
-
       }
     });
 
     // Check for all commands here
     current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
-      $(".turn").remove();
-      let temp = "";
-      for(let i = 0; i < current_round.hands[e.getBetter().player_id].length; i++) {
-        let arr_key = e.getBetter().player_id;
-        temp += " suit: " + current_round.hands[arr_key][i].getSuit() + " rank: " + current_round.hands[arr_key][i].getRank();
-      }
       if(e.getBetter().player_id === id) {
-        that.appendMessage("Your turn - (budget: "+e.getBetter().actions.getBudget()+") your cards ("+temp+")");
+        that.appendMessage("Your turn - (budget: " + e.getBetter().actions.getBudget() + ")");
 
         $("#pokerConsole").on("keydown", function(event) {
           if(event.keyCode === 13) {
@@ -85,14 +80,37 @@
               current_round.fold(e.getBetter().player_id);
             } else if(input === "check"){
               current_round.check(e.getBetter().player_id);
-            } else if(input === "budget") {
-              that.appendMessage(e.getBetter().getBudget());
             } else if(input === "hand") {
+              let playerHand = '';
+              for(let i = 0; i < current_round.hands[e.getBetter().player_id].length; i++) {
+                let arr_key = e.getBetter().player_id;
+                playerHand += current_round.hands[arr_key][i].toString();
+                if(i === 0) { playerHand += '<br />'; }
+              }
+              
+              that.appendMessage(playerHand);
+            } else if(input === "pot") {
+              let totalPot = 0;
+              for(var player in current_round.pot) {
+                totalPot += current_round.pot[player];
+              }
+
+              that.appendMessage("Current pot: " + totalPot);
+            } else if(input === "budgets") {
+              let message = '<b>Budgets:</b>'
+              for(let i = 0; i < current_round.players.length; i++) {
+                message += '<br />';
+                message += current_round.players[i].getName() + ': ' + current_round.players[i].actions.getBudget();
+              }
+              that.appendMessage(message);
+            } else if(input === 'help') {
+              that.appendMessage('Actions: raise (int), call, fold, check, hand, pot, budgets, help');
             } else {
               that.appendMessage("Invalid command");
             }
           }
         });
+
         if(e.getValidActions().hasOwnProperty('call')) {
           that.appendMessage("Valid bet actions: raise, fold, or call");
         } else {
@@ -104,12 +122,12 @@
     });
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
-
       if(e.getBetAmount() > 0) {
         that.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType() + " $" + e.getBetAmount());
       } else {
         that.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType());
       }
+
       $("#pot").text(JSON.stringify(current_round.pot));
       $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
     });
