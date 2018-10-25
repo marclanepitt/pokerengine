@@ -27,9 +27,9 @@
                     $('#matchConsole').show();
 
                     var textplayer = new TextPlayer(username);
-                    var ai = new DumbAI("b");
-                    var ai1 = new DumbAI("c");
-                    var ai2 = new DumbAI("d");
+                    var ai = new DumbAI("CPU1");
+                    var ai1 = new DumbAI("CPU2");
+                    var ai2 = new DumbAI("CPU3");
 
                     var players = [textplayer,ai,ai1,ai2]
                     var match = new PokerMatch(players, {});

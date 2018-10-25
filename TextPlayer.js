@@ -33,18 +33,24 @@ var TextPlayer = function (name) {
 
     current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
       that.appendMessage("ROUND STARTED");
-      that.appendMessage("Current dealer: " + e.getDealer().getName());
+      that.appendMessage("Current dealer: " + e.getDealer().getName() + ". SB = " + e.getSmallBlind() + "; BB = "  + (e.getSmallBlind()*2));
+
     });
 
     current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, function (e) {
-      that.appendMessage("Round Ended, "+e.getWinner().actions.getName()+" won " + e.getWinnings() + " money with a " + e.getType())
+      that.appendMessage("Round Ended, "+e.getWinner().actions.getName()+" won $" + e.getWinnings() + " with " + e.getType())
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
       for(let i = 0; i < e.getFlippedCards().length; i++) {
         allFlippedCards += " suit: " + e.getFlippedCards()[i].getSuit() + " rank: " + e.getFlippedCards()[i].getRank();
       }
-      that.appendMessage("Turn started, flipped cards are " + allFlippedCards);
+      if(allFlippedCards.length != 0) {
+        that.appendMessage("Turn started, flipped cards are " + allFlippedCards);
+      } else {
+        that.appendMessage("Turn started, preflop (no flipped cards)");
+
+      }
     });
 
     // Check for all commands here
@@ -52,7 +58,8 @@ var TextPlayer = function (name) {
       $(".turn").remove();
       let temp = "";
       for(let i = 0; i < current_round.hands[e.getBetter().player_id].length; i++) {
-        temp += " suit: " + current_round.hands[e.getBetter().player_id][i].getSuit() + " rank: " + current_round.hands[id][i].getRank();
+        let arr_key = e.getBetter().player_id;
+        temp += " suit: " + current_round.hands[arr_key][i].getSuit() + " rank: " + current_round.hands[arr_key][i].getRank();
       }
       if(e.getBetter().player_id === id) {
         that.appendMessage("Your turn - (budget: "+e.getBetter().actions.getBudget()+") your cards ("+temp+")");
@@ -80,15 +87,23 @@ var TextPlayer = function (name) {
             }
           }
         });
+        if(e.getValidActions().hasOwnProperty('call')) {
+          that.appendMessage("Valid bet actions: raise, fold, or call");
+        } else {
+          that.appendMessage("Valid bet actions: raise, fold, or check");
+        }
       } else {
         that.appendMessage(e.getBetter().getName() + "'s turn - (budget: "+e.getBetter().actions.getBudget()+")");
       }
     });
 
-
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
 
-      that.appendMessage(e.getPreviousBetter().getName() + " " + e.getBetType())
+      if(e.getBetAmount() > 0) {
+        that.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType() + " $" + e.getBetAmount());
+      } else {
+        that.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType());
+      }
       $("#pot").text(JSON.stringify(current_round.pot));
       $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
     });
@@ -98,12 +113,11 @@ var TextPlayer = function (name) {
     });
 
     current_round.registerEventHandler(Poker.GAME_OVER_EVENT, function(e) {
-      that.appendMessage(e.getWinner().actions.getName() + " won the whole thing");
+      that.appendMessage(e.getWinner().actions.getName() + " has won the entire game!");
     });
 
     current_round.registerEventHandler(Poker.ERROR, function (e) {
-        // that.appendMessage("ERROR: " + e.getError());
-        console.log(e.getError());
+      console.log(e.getError());
     });
   }
 }

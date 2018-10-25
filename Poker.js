@@ -190,8 +190,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       }
     } else {
       if(activePlayerIds.indexOf(next_player_id) === -1) {
+        // out of game
         return getNextActiveBetter(next_player_id);
       } else if(that.players[next_player_id].actions.getBudget() === 0) {
+        // skips all-in players
         return getNextActiveBetter(next_player_id);
       } else {
         return that.players[next_player_id];
@@ -214,7 +216,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       "raise":that.raise
     };
     that.pot[current_better.player_id] < getMaxBet() ? validActions['call'] = that.call : validActions['check'] = that.check;
-    console.log(validActions);
     return validActions;
   }
 
@@ -236,57 +237,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return that.players[player_id];
   }
 
-  // event functions
-  var newTurn = function() {
-    if(current_turn != 0) {
-      terminatingPlayerId = null;
-    }
-
-    resetBetTokens();
-
-    current_turn++;
-    if(current_turn != 1) {
-      current_better = that.dealer;
-    }
-
-    // all players fold
-    if(activePlayerIds.length === 1) {
-      that.players[activePlayerIds[0]].actions.addBudget(getTotalPot());
-      return dispatchEvent(new RoundEndedEvent(that.players[activePlayerIds[0]], getTotalPot(), "Everyone folded"))
-    }
-
-    // all money in pot TODO MAY NEED TO HANDLE CARDS
-    // if(activePlayerIds.length === 0) {
-    //   let winner = that.evaluateWinner();
-    //   winner.player.actions.addBudget(getTotalPot());
-    //   console.log("no money");
-    //   dispatchEvent(new RoundEndedEvent(winner.player, getTotalPot(), winner.type));
-    // }
-
-    // round over
-    if(current_turn === 5) {
-      let winner = that.evaluateWinner();
-      winner.player.actions.addBudget(getTotalPot());
-      dispatchEvent(new RoundEndedEvent(winner.player, getTotalPot(), winner.type));
-      return;
-    }
-
-    let flippedCards = that.deck.deal(current_turn < 2 ? 0 : current_turn === 2 ? 3 : 1);
-    for(let i = 0; i < flippedCards.length; i++) {
-      that.allFlippedCards.push(flippedCards[i]);
-    }
-
-    dispatchEvent(new TurnStartedEvent(current_turn, flippedCards));
-    return newBet();
-  }
-
-  var dealCardsAndPush = function(num_cards) {
-    let flippedCards = that.deck.deal(num_cards);
-    for(let i = 0; i < flippedCards.length; i++) {
-      that.allFlippedCards.push(flippedCards[i]);
-    }
-  }
-
   var endRoundPlayersHaveNoMoney = function () {
     switch(current_turn) {
       case 1:
@@ -305,34 +255,90 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     dispatchEvent(new RoundEndedEvent(winner.player, getTotalPot(), winner.type));
   }
 
+  var allPlayersAllIn = function() {
+    let players_all_in = 0;
+    for(let i = 0; i < activePlayerIds.length; i++) {
+      if(players[activePlayerIds[i]].actions.getBudget() === 0) {
+        players_all_in++;
+      }
+    }
+    return (players_all_in === activePlayerIds.length);
+  }
+
+  var endRoundAllButOneFolded = function() {
+    that.players[activePlayerIds[0]].actions.addBudget(getTotalPot());
+    dispatchEvent(new RoundEndedEvent(that.players[activePlayerIds[0]], getTotalPot(), "Everyone folded"))
+  }
+
+  var endRoundAllCardsFlopped = function() {
+    let winner = that.evaluateWinner();
+    winner.player.actions.addBudget(getTotalPot());
+    dispatchEvent(new RoundEndedEvent(winner.player, getTotalPot(), winner.type));
+  }
+
+  var dealCardsAndPush = function(num_cards) {
+    let flippedCards = that.deck.deal(num_cards);
+    for(let i = 0; i < flippedCards.length; i++) {
+      that.allFlippedCards.push(flippedCards[i]);
+    }
+  }
+
+  // event functions
+  var newTurn = function() {
+    if(current_turn != 0) {
+      terminatingPlayerId = null;
+    }
+
+    if(allPlayersAllIn()) {
+      return endRoundPlayersHaveNoMoney();
+    }
+
+    resetBetTokens();
+
+    current_turn++;
+    if(current_turn != 1) {
+      current_better = that.dealer;
+    }
+
+    // all players fold
+    if(activePlayerIds.length === 1) {
+      return endRoundAllButOneFolded();
+    }
+
+    // round over - cards flopped
+    if(current_turn === 5) {
+      return endRoundAllCardsFlopped();
+    }
+
+    // continue to next turn
+    let flippedCards = that.deck.deal(current_turn < 2 ? 0 : current_turn === 2 ? 3 : 1);
+    for(let i = 0; i < flippedCards.length; i++) {
+      that.allFlippedCards.push(flippedCards[i]);
+    }
+
+    dispatchEvent(new TurnStartedEvent(current_turn, flippedCards));
+    return newBet();
+  }
+
   var newBet = function() {
     setTimeout(() => {
       current_better = getNextActiveBetter(current_better.player_id);
-      if(current_better === null) {
+      if(current_better === null || allPlayersAllIn()) {
         return endRoundPlayersHaveNoMoney();
       }
+
       //end turn and new turn if we reach terminating player
       if(current_better.player_id === terminatingPlayerId || activePlayerIds.length === 1) {
         dispatchEvent(new TurnEndedEvent());
         return newTurn();
       }
+
       if(terminatingPlayerId === null) {
         terminatingPlayerId = current_better.player_id;
       }
       //if they fold while terminating player in start of new turn
       if(activePlayerIds.indexOf(terminatingPlayerId) === -1) {
         terminatingPlayerId = getNextActiveBetter(terminatingPlayerId).player_id;
-      }
-
-      if(current_better.actions.getBudget() === 0) {
-        current_better.actions.deactivate();
-        activePlayerIds.splice(activePlayerIds.indexOf(current_better.player_id),1);
-        current_better = getNextActiveBetter(current_better.player_id);
-
-        if(current_better === null) {
-          dispatchEvent(new TurnEndedEvent());
-          return newTurn();
-        }
       }
 
       dispatchEvent(new BetStartedEvent(current_better, getValidActions()));
@@ -345,12 +351,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   this.startRound = function() {
 
-    // need pre-flop logic
-    // get deck: done at top
-    // shuffle deck
     that.deck.shuffle();
-    // deal "hole" cards: burn?
-    // deal cards
     for(let i = 0; i < activePlayerIds.length; i++) {
       let cards = that.deck.deal(2);
       that.hands[activePlayerIds[i]] = [cards[0], cards[1]];
@@ -359,15 +360,11 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
     // pay blinds
 
-    let sb = activePlayerIds[(activePlayerIds.indexOf(dealer.player_id) + 1) % activePlayerIds.length];
-    let bb = activePlayerIds[(activePlayerIds.indexOf(dealer.player_id) + 2) % activePlayerIds.length];
-    // make sure player can bet somehow
-    that.pot[sb] += smallBlind;
-    that.pot[bb] += smallBlind * 2;
-    players[sb].actions.subBudget(smallBlind);
-    players[bb].actions.subBudget(smallBlind * 2);
-    // bet starting with player left of big blind
-    // !!! must be able to pass dealer position to bet
+    let small_blind_idx = 1;
+    let big_blind_idx = 2;
+    payBlind(small_blind_idx);
+    payBlind(big_blind_idx);
+
     return newTurn();
   }
 
@@ -380,7 +377,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(current_better.actions.canBet()) {
 
       if(!isValidAction("raise")) {
-        dispatchEvent(new Error("Not a valid bet action", player_id));
+        dispatchEvent(new Error("Not a valid bet action"));
         return;
       }
 
@@ -391,8 +388,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         // bet case
         terminatingPlayerId = current_better.player_id;
         var curr_pot_diff = getMaxBet() - that.pot[current_better.player_id];
+        // move money from budget to pot
         that.pot[current_better.player_id] += curr_pot_diff + bet_amount;
         current_better.actions.subBudget(curr_pot_diff + bet_amount);
+        // dispatch and adjust state
         dispatchEvent(new BetEndedEvent("bet", (getMaxBet() - that.pot[current_better.player_id]) + bet_amount, current_better));
         resetBetTokens();
         current_better.actions.hasBet();
@@ -412,7 +411,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(current_better.actions.canBet()) {
 
       if(!isValidAction("fold")) {
-        dispatchEvent(new Error("Not a valid bet action", player_id));
+        dispatchEvent(new Error("Not a valid bet action"));
         return;
       }
 
@@ -435,7 +434,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
     if(current_better.actions.canBet()) {
       if(!isValidAction("check")) {
-        dispatchEvent(new Error("Not a valid bet action", player_id));
+        dispatchEvent(new Error("Not a valid bet action"));
         return;
       }
 
@@ -455,7 +454,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     if(current_better.actions.canBet()) {
 
       if(!isValidAction("call")) {
-        dispatchEvent(new Error("Not a valid bet action", player_id));
+        dispatchEvent(new Error("Not a valid bet action"));
         return;
       }
 
