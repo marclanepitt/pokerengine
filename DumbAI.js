@@ -46,7 +46,11 @@ var DumbAI = function (name) {
                 action((maxBet-aiPot)+1, e.getBetter().player_id);
               } else {
                 // if bet is too high, call/check
-                e.getValidActions()[2](e.getBetter().player_id);
+                if(e.getValidActions()['call']) {
+                  e.getValidActions()['call'](id);
+                } else {
+                  e.getValidActions()['check'](id);
+                }
               }
             } else {
               action(e.getBetter().player_id);
