@@ -40,8 +40,13 @@ var PokerMatch = function (players, settings) {
     if(roundCount % 3 === 0) {
       smallBlind = smallBlind * 2;
     }
-    //TODO only do active players
-    var dealer = that.players[roundCount % that.players.length];
+    var activePlayers = [];
+    for(let i = 0; i < that.players.length; i++) {
+      if(that.players[i].actions.getActiveStatus()) {
+        activePlayers.push(that.players[i]);
+      }
+    }
+    var dealer = activePlayers[roundCount % activePlayers.length];
     var next_round = new RoundOfPoker(smallBlind, dealer, that.players);
 
     round_setup_handlers.forEach(function (callback) {

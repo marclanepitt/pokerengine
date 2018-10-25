@@ -176,7 +176,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var getNextActiveBetter = function(current_better_id) {
     let next_player_id = that.players[(current_better_id + 1) % that.players.length].player_id;
-    if(activePlayerIds.indexOf(next_player_id) === -1) {
+    if(activePlayerIds.indexOf(next_player_id) === -1 || that.players[next_player_id].actions.getBudget() === 0) {
       return getNextActiveBetter(next_player_id);
     } else {
       return that.players[next_player_id];
@@ -314,7 +314,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   // bet actions
   this.raise = function(bet_amount, player_id) {
-
     if(!isBetter(player_id)) {
       dispatchEvent(new Error("Not "+player_id+"'s turn", player_id));
       return;
