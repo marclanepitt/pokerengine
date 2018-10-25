@@ -35,6 +35,7 @@ var DumbAI = function (name) {
 
       current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
         if(e.getBetter().player_id === id) {
+          console.log(e.getValidActions()[0].toString());
             let action = e.getValidActions()[1+Math.floor(Math.random()*(e.getValidActions().length-1))];
             if(action.length === 2) {
               let maxBet  = getMax(current_round.pot);
