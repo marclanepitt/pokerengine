@@ -89,7 +89,7 @@ var TextPlayer = function (name) {
 
     current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
 
-      that.appendMessage(e.getPreviousBetter().getName() + " " + e.getBetType())
+      that.appendMessage(e.getPreviousBetter().getName() + " " + e.getBetType() + " " + e.getBetAmount())
       $("#pot").text(JSON.stringify(current_round.pot));
       $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
     });

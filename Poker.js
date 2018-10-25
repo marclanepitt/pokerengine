@@ -184,7 +184,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   var isValidAction = function(bet_action) {
-    return getValidActions().includes(bet_action);
+    return getValidActions().hasOwnProperty(bet_action);
   }
 
   var isBetter = function(player_id) {
@@ -193,8 +193,11 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var getValidActions = function() {
     // returns valid poker bet actions
-    let validActions = [that.fold, that.raise];
-    that.pot[current_better.player_id] < getMaxBet() ? validActions.push(that.call) : validActions.push(that.check);
+    let validActions = {
+      fold:that.fold, 
+      raise:that.raise
+    };
+    that.pot[current_better.player_id] < getMaxBet() ? validActions['call'] = that.call : validActions['check'] = that.check;
 
     return validActions;
   }
@@ -321,7 +324,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
     if(current_better.actions.canBet()) {
 
-      if(!isValidAction(that.raise)) {
+      if(!isValidAction("raise")) {
         dispatchEvent(new Error("Not a valid bet action", player_id));
         return;
       }
@@ -353,7 +356,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
     if(current_better.actions.canBet()) {
 
-      if(!isValidAction(that.fold)) {
+      if(!isValidAction("fold")) {
         dispatchEvent(new Error("Not a valid bet action", player_id));
         return;
       }
@@ -376,7 +379,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
 
     if(current_better.actions.canBet()) {
-      if(!isValidAction(that.check)) {
+      if(!isValidAction("check")) {
         dispatchEvent(new Error("Not a valid bet action", player_id));
         return;
       }
@@ -396,7 +399,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
     if(current_better.actions.canBet()) {
 
-      if(!isValidAction(that.call)) {
+      if(!isValidAction("call")) {
         dispatchEvent(new Error("Not a valid bet action", player_id));
         return;
       }
