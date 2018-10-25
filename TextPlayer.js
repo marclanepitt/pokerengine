@@ -99,7 +99,9 @@ var TextPlayer = function (name) {
     });
 
     current_round.registerEventHandler(Poker.ERROR, function (e) {
-      that.appendMessage("ERROR: " + e.getError());
+      if(e.getPlayerId() === id) {
+        that.appendMessage("ERROR: " + e.getError());
+      }
     });
   }
 }
