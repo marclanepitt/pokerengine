@@ -174,7 +174,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var getNextActiveBetter = function(current_better_id) {
     let next_player_id = that.players[(current_better_id + 1) % that.players.length].player_id;
-    if(activePlayerIds.indexOf(next_player_id) === -1 || that.players[next_player_id].getBudget() === 0) {
+    if(activePlayerIds.indexOf(next_player_id) === -1 || that.players[next_player_id].actions.getBudget() === 0) {
       return getNextActiveBetter(next_player_id);
     } else {
       return that.players[next_player_id];
