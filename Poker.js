@@ -425,9 +425,10 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   this.call = function(player_id) {
     if(!isBetter(player_id)) {
-      dispatchEvent(new Error("Not "+player_id+"'s turn"));
+      dispatchEvent(new Error("Not " + player_id + "'s turn"));
       return;
     }
+
     if(current_better.actions.canBet()) {
 
       if(!isValidAction("call")) {
@@ -682,13 +683,13 @@ var TurnStartedEvent = function(state,flippedCards) {
   this.getTurnState = function() {
     switch(state) {
       case 1:
-      return "pre flop"
+        return "pre flop"
       case 2:
-      return "flop";
+        return "flop";
       case 3:
-      return "turn";
+        return "turn";
       case 4:
-      return "river";
+        return "river";
     }
   }
   this.getFlippedCards = function() {
