@@ -7,6 +7,7 @@
 var PokerMatch = function (players, settings) {
   defaultSettings = {
     startingBudget:100,
+    smallBlind: 2,
   }
 
   this.settings = Object.assign(defaultSettings, settings);
@@ -21,7 +22,7 @@ var PokerMatch = function (players, settings) {
     players[i].player_id = i;
   }
 
-  var smallBlind = 2;
+  var smallBlind = this.settings.smallBlind;
   var roundCount = 1;
 
   var that = this;
