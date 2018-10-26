@@ -1,5 +1,7 @@
 var DumbAI = function (name) {
-    this.actions = new PlayerActions(name);
+    this.actions = new PlayerActions();
+    this.name = name;
+    
     var current_round = null;
 
     this.setupMatch = function (poker_match) {

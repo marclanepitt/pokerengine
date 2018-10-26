@@ -5,7 +5,8 @@
  */
 
  var TextPlayer = function (name) {
-  this.actions = new PlayerActions(name);
+  this.actions = new PlayerActions();
+  this.name = name;
 
   var match = null;
   var current_round = null;
@@ -44,7 +45,7 @@
     });
 
     current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, function (e) {
-      that.appendMessage("Round Ended, " + e.getWinner().actions.getName() + " won $" + e.getWinnings() + " with " + e.getType());
+      that.appendMessage("Round Ended, " + e.getWinner().name + " won $" + e.getWinnings() + " with " + e.getType());
     });
 
     current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
@@ -90,7 +91,7 @@
     });
 
     current_round.registerEventHandler(Poker.GAME_OVER_EVENT, function(e) {
-      that.appendMessage(e.getWinner().actions.getName() + " has won the entire game!");
+      that.appendMessage(e.getWinner().name + " has won the entire game!");
     });
 
     current_round.registerEventHandler(Poker.ERROR, function (e) {

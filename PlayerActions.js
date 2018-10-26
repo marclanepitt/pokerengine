@@ -14,9 +14,6 @@ var PlayerActions = function (name, budget) {
 PlayerActions.prototype.resetHasBet = function() { this.hasNotBet = true; }
 PlayerActions.prototype.hasBet = function() { this.hasNotBet = false; }
 PlayerActions.prototype.canBet = function() { return this.hasNotBet; }
-
-// name
-PlayerActions.prototype.getName = function() { return this.name; }
 // active
 PlayerActions.prototype.deactivate = function() { this.active = false; }
 PlayerActions.prototype.activate = function() { this.active = true; }
