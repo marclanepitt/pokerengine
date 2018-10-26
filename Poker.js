@@ -1,6 +1,5 @@
 /*
 *  COMP 426 - Fall 2018
-* Game of Hearts model object
 *
 * Events:
 *  startRound
@@ -127,17 +126,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       dispatch_queue.push(e);
     } else {
       dispatching = true;
-      // If the game is over, don't generate events.
-      if (that.status == Poker.FINISHED) {
-        return;
-      }
-
-      // If this is the game over event, update the
-      // game status to be FINISHED and calculate
-      // final scores
-      if (e.event_type == Poker.GAME_OVER_EVENT) {
-        that.status = Poker.FINISHED;
-      }
 
       // A bit of a hack to add a game property
       // to every event that is fired without having to
@@ -153,15 +141,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         });
       }
 
-      // Call all handlers registered for ALL_EVENTS
-      // handlers = registeredEventHandlers[Poker.ALL_EVENTS];
-      //
-      // if (handlers != null) {
-      //   handlers.forEach(function (h) {
-      //     var e_clone = $.extend(true, {}, e);
-      //     h(e_clone);
-      //   });
-      // }
       dispatching = false;
 
       if (dispatch_queue.length > 0) {
@@ -425,7 +404,6 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
   }
 
   this.check = function(player_id) {
-
     if(!isBetter(player_id)) {
       dispatchEvent(new Error("Not "+player_id+"'s turn"));
       return;

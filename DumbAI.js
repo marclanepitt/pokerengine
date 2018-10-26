@@ -1,9 +1,6 @@
 var DumbAI = function (name) {
-    this.actions = new Player(name);
-
-    var match = null;
+    this.actions = new PlayerActions(name);
     var current_round = null;
-    var player_id = null;
 
     this.setupMatch = function (poker_match) {
       match = poker_match;

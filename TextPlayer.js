@@ -5,12 +5,11 @@
  */
 
  var TextPlayer = function (name) {
-  this.actions = new Player(name);
+  this.actions = new PlayerActions(name);
 
   var match = null;
   var current_round = null;
   var player_id = null;
-  var executeToken = 1;
 
   var that = this;
 
