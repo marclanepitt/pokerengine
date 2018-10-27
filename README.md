@@ -1,4 +1,4 @@
-# H1 Javascript Poker engine
+# Javascript Poker engine
 
 ### Custom Settings
 ##### startingBudget
