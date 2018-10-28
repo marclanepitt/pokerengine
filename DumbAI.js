@@ -35,17 +35,17 @@ var DumbAI = function (name) {
             let aiPot = current_round.pot[id];
             let amt_to_raise = (maxBet-aiPot)+1;
             if(amt_to_raise <= e.getBetter().actions.budget - (maxBet - aiPot)) {
-              action((maxBet-aiPot)+1, e.getBetter().player_id);
+              action((maxBet-aiPot)+1);
             } else {
               // if bet is too high, call/check
               if(e.getValidActions()['call']) {
-                e.getValidActions()['call'](id);
+                e.getValidActions()['call']();
               } else {
-                e.getValidActions()['check'](id);
+                e.getValidActions()['check']();
               }
             }
           } else {
-            action(e.getBetter().player_id);
+            action(e.getBetter());
           }
         }
       });

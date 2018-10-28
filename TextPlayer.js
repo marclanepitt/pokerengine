@@ -107,14 +107,14 @@
         let argList = input.split(' ');
         if(argList.length === 2 && !isNaN(parseInt(argList[1]))) {
           let number = parseInt(argList[1]);
-          current_round.raise(number, player_id);
+          current_round.raise(number);
         }
       } else if(input === "call") {
-        current_round.call(player_id);
+        current_round.call();
       } else if(input ==="fold") {
-        current_round.fold(player_id);
+        current_round.fold();
       } else if(input === "check"){
-        current_round.check(player_id);
+        current_round.check();
       } else if(input === "hand") {
         let playerHand = '';
         for(let i = 0; i < current_round.hands[player_id].length; i++) {
