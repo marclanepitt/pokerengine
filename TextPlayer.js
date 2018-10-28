@@ -1,7 +1,8 @@
 /*
  *  COMP 426 - Fall 2018
  *  Basic UI
- *
+ *  make enter button work
+ *  clear input when command accepted
  */
 
  var TextPlayer = function (name) {

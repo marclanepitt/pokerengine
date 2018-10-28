@@ -334,7 +334,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       let cards = that.deck.deal(2);
       that.hands[activePlayerIds[i]] = [cards[0], cards[1]];
     }
-    dispatchEvent(new RoundStartedEvent(smallBlind, dealer, that.hands));
+    dispatchEvent(new RoundStartedEvent(smallBlind, dealer, that.hands, that.players, activePlayerIds));
 
     // pay blinds
 
@@ -346,9 +346,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return newTurn();
   }
 
-  this.raise = function(bet_amount, player_id) {
-    if(!isBetter(player_id)) {
-      dispatchEvent(new Error("Not "+player_id+"'s turn"));
+  this.raise = function(bet_amount) {
+    if(!isBetter(current_better.player_id)) {
+      dispatchEvent(new Error("Not "+current_better.player_id+"'s turn"));
       return;
     }
 
@@ -380,9 +380,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
   }
 
-  this.fold = function(player_id) {
-    if(!isBetter(player_id)) {
-      dispatchEvent(new Error("Not "+player_id+"'s turn"));
+  this.fold = function() {
+    if(!isBetter(current_better.player_id)) {
+      dispatchEvent(new Error("Not "+current_better.player_id+"'s turn"));
       return;
     }
 
@@ -393,7 +393,7 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         return;
       }
 
-      activePlayerIds.splice(activePlayerIds.indexOf(player_id),1); //out of round not game
+      activePlayerIds.splice(activePlayerIds.indexOf(current_better.player_id),1); //out of round not game
 
       dispatchEvent(new BetEndedEvent("fold", -1, current_better));
       current_better.actions.hasBet();
@@ -403,9 +403,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
   }
 
-  this.check = function(player_id) {
-    if(!isBetter(player_id)) {
-      dispatchEvent(new Error("Not "+player_id+"'s turn"));
+  this.check = function() {
+    if(!isBetter(current_better.player_id)) {
+      dispatchEvent(new Error("Not "+current_better.player_id+"'s turn"));
       return;
     }
 
@@ -423,9 +423,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
   }
 
-  this.call = function(player_id) {
-    if(!isBetter(player_id)) {
-      dispatchEvent(new Error("Not " + player_id + "'s turn"));
+  this.call = function() {
+    if(!isBetter(current_better.player_id)) {
+      dispatchEvent(new Error("Not " + current_better.player_id + "'s turn"));
       return;
     }
 
@@ -638,20 +638,29 @@ var BetEndedEvent = function(bet_type, bet_amount, player) {
   this.getPreviousBetter = function() {
     return player;
   }
+
 }
 
-var RoundStartedEvent = function(smallBlind, dealer, hands) {
+var RoundStartedEvent = function(smallBlind, dealer, hands, players, activePlayerIds) {
   this.event_type = Poker.ROUND_STARTED_EVENT;
   this.getSmallBlind = function() {
-    return smallBlind; //should we return player?
+    return smallBlind;
   }
 
   this.getBigBlind = function() {
-    return smallBlind * 2; //should we return player?
+    return smallBlind * 2;
   }
 
   this.getDealer = function() {
     return dealer;
+  }
+
+  this.getBigBlindPlayer = function() {
+    return players[activePlayerIds[(activePlayerIds.indexOf(dealer.player_id) + 2 ) % activePlayerIds.length]];
+  }
+
+  this.getSmallBlindPlayer = function() {
+    return players[activePlayerIds[(activePlayerIds.indexOf(dealer.player_id) + 1 ) % activePlayerIds.length]];
   }
 
   this.getHand = function(player_id) {

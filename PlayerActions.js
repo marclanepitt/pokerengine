@@ -4,8 +4,7 @@
  *
  */
 
-var PlayerActions = function (name, budget) {
-  this.name = name,
+var PlayerActions = function (budget) {
   this.budget = budget,
   this.active = true,
   this.hasNotBet = true;

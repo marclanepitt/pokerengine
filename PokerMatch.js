@@ -1,7 +1,10 @@
 /*
  *  COMP 426 - Fall 2018
  *  Set up poker game
- *
+ *  Add two functions
+ *  getPlayerActiveStatus
+ *  getPlayerBudget
+ *  settingsvariable for blind increase
  */
 
 var PokerMatch = function (players, settings) {
