@@ -3,6 +3,7 @@ var DumbAI = function (name) {
     this.name = name;
     
     var current_round = null;
+    var match = null;
 
     this.setupMatch = function (poker_match) {
       match = poker_match;
@@ -34,7 +35,7 @@ var DumbAI = function (name) {
             let maxBet  = getMax(current_round.pot);
             let aiPot = current_round.pot[id];
             let amt_to_raise = (maxBet-aiPot)+1;
-            if(amt_to_raise <= e.getBetter().actions.budget - (maxBet - aiPot)) {
+            if(amt_to_raise <= match.getPlayerBudget(e.getBetter().player_id) - (maxBet - aiPot)) {
               action((maxBet-aiPot)+1);
             } else {
               // if bet is too high, call/check

@@ -1,8 +1,6 @@
 /*
  *  COMP 426 - Fall 2018
  *  Basic UI
- *  make enter button work
- *  clear input when command accepted
  */
 
  var TextPlayer = function (name) {
@@ -65,7 +63,7 @@
     // Check for all commands here
     current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
       if(e.getBetter().player_id === id) {
-        that.appendMessage("Your turn - (budget: " + e.getBetter().actions.getBudget() + ")");
+        that.appendMessage("Your turn - (budget: " + match.getPlayerBudget(e.getBetter().player_id) + ")");
 
         if(e.getValidActions().hasOwnProperty('call')) {
           that.appendMessage("Valid bet actions: raise, fold, or call");
@@ -73,7 +71,7 @@
           that.appendMessage("Valid bet actions: raise, fold, or check");
         }
       } else {
-        that.appendMessage(e.getBetter().getName() + "'s turn - (budget: "+e.getBetter().actions.getBudget()+")");
+        that.appendMessage(e.getBetter().getName() + "'s turn - (budget: "+match.getPlayerBudget(e.getBetter().player_id)+")");
       }
     });
 
@@ -84,7 +82,7 @@
         that.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType());
       }
 
-      $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(e.getPreviousBetter().actions.getBudget());
+      $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(match.getPlayerBudget(e.getPreviousBetter().player_id));
     });
 
     current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, function (e) {
@@ -99,9 +97,8 @@
       console.log(e.getError());
     });
   }
-
-  $("#pokerConsole").on("keyup", function(event) {
-    if(event.keyCode === 13) {
+  let handleTextInput =  function(event, isClick) {
+    if(event.keyCode === 13 || isClick) {
       let input = $("#pokerConsole").val();
       if(input.substring(0,5) === "raise") {
         let argList = input.split(' ');
@@ -135,7 +132,7 @@
         let message = '<b>Budgets:</b>'
         for(let i = 0; i < current_round.players.length; i++) {
           message += '<br />';
-          message += current_round.players[i].getName() + ': ' + current_round.players[i].actions.getBudget();
+          message += current_round.players[i].getName() + ': ' + match.getPlayerBudget(current_round.players[i].player_id);
         }
         that.appendMessage(message);
       } else if(input === 'help') {
@@ -143,6 +140,11 @@
       } else {
         that.appendMessage("Invalid command");
       }
+      $("#pokerConsole").val("");
+
     }
-  });
+  }
+
+  $("#pokerConsole").on("keyup", (e)=>{handleTextInput(e, false)});
+  $("#consoleSubmit").on("click", (e)=>{handleTextInput(e, true)});
 }

@@ -1,16 +1,13 @@
 /*
  *  COMP 426 - Fall 2018
  *  Set up poker game
- *  Add two functions
- *  getPlayerActiveStatus
- *  getPlayerBudget
- *  settingsvariable for blind increase
  */
 
 var PokerMatch = function (players, settings) {
   defaultSettings = {
     startingBudget:100,
     smallBlind: 2,
+    blindIncreaseFrequency: 3,
   }
 
   this.settings = Object.assign(defaultSettings, settings);
@@ -50,7 +47,7 @@ var PokerMatch = function (players, settings) {
   }
 
   var setup_next_round = function (e) {
-    if(roundCount % 2 === 0) {
+    if(roundCount % that.settings.blindIncreaseFrequency === 0) {
       smallBlind = smallBlind * 2;
     }
 
@@ -81,6 +78,14 @@ var PokerMatch = function (players, settings) {
 
   this.run = function() {
     setup_next_round();
+  }
+
+  this.getPlayerActiveStatus = function(player_id) {
+    return that.players[player_id].actions.getActiveStatus();
+  }
+
+  this.getPlayerBudget = function(player_id) {
+    return that.players[player_id].actions.getBudget();
   }
 
   for(var i = 0; i < that.players.length; i++) {

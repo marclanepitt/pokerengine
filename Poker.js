@@ -2,13 +2,13 @@
 *  COMP 426 - Fall 2018
 *
 * Events:
-*  startRound
 *  BetStartedEvent
 *  BetEndedEvent
 *  RoundStartedEvent
 *  RoundEndedEvent
 *  TurnStartedEvent
 *  TurnEndedEvent
+*  GameOverEvent
 *
 * Game functions:
 *  startRound
