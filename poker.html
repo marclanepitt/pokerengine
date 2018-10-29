@@ -15,31 +15,8 @@
     <script src="Card.js"></script>
     <script src="PlayerActions.js"></script>
     <script src="DumbAI.js"></script>
-    <script src="TextPlayer.js"></script>
-    <script>
-        $(document).ready(function(){
-            $('#usernameEnter').click(function() {
-                let username = $('#usernameInput').val();
-                if(username === '') {
-                    console.log('Invalid username');
-                } else {
-                    $('#usernameConsole').hide();
-                    $('#matchConsole').show();
-
-                    var textplayer = new TextPlayer(username);
-                    var ai = new DumbAI("CPU1");
-                    var ai1 = new DumbAI("CPU2");
-                    var ai2 = new DumbAI("CPU3");
-                    var ai3 = new DumbAI("CPU4");
-
-                    var players = [textplayer,ai,ai1,ai2, ai3]
-                    var match = new PokerMatch(players, {});
-
-                    match.run();
-                }
-            });
-        });
-    </script>
+    <script src="Player.js"></script>
+    <script src="Main.js"></script>
 </head>
 <body>
     <!-- <input type="text" id="betAmount"> -->

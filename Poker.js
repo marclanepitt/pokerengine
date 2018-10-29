@@ -179,9 +179,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     }
   }
 
-  var isValidAction = function(bet_action) {
-    return getValidActions().hasOwnProperty(bet_action);
-  }
+    var isValidAction = function(bet_action) {
+	return getValidActions().includes(bet_action);
+    }
 
   var isBetter = function(player_id) {
     return current_better.player_id === player_id;
@@ -189,12 +189,9 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
 
   var getValidActions = function() {
     // returns valid poker bet actions
-    let validActions = {
-      "fold":that.fold,
-      "raise":that.raise
-    };
-    that.pot[current_better.player_id] < getMaxBet() ? validActions['call'] = that.call : validActions['check'] = that.check;
-    return validActions;
+      let validActions = ["fold", "raise"];
+      that.pot[current_better.player_id] < getMaxBet() ? validActions.push('call') : validActions.push('check');
+      return validActions;
   }
 
   var payBlind = function(blind_idx) {
@@ -352,6 +349,11 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
       return;
     }
 
+      if (bet_amount < 1) {
+	  dispatchEvent(new Error("Illegal raise: " + bet_amount));
+	  return;
+      }
+
     if(current_better.actions.canBet()) {
 
       if(!isValidAction("raise")) {
@@ -370,13 +372,13 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
         that.pot[current_better.player_id] += curr_pot_diff + bet_amount;
         current_better.actions.subBudget(curr_pot_diff + bet_amount);
         // dispatch and adjust state
-        dispatchEvent(new BetEndedEvent("bet", (getMaxBet() - that.pot[current_better.player_id]) + bet_amount, current_better));
+        dispatchEvent(new BetEndedEvent("raise", (getMaxBet() - that.pot[current_better.player_id]) + bet_amount, current_better));
         resetBetTokens();
         current_better.actions.hasBet();
         return newBet();
       }
     } else {
-      dispatchEvent(new Error("Not your turn to make bet action"));
+	dispatchEvent(new Error("Not your turn to make bet action" + " (" + current_better.getName() + ")"));
     }
   }
 

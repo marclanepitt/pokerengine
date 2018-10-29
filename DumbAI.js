@@ -1,7 +1,6 @@
 var DumbAI = function (name) {
     this.actions = new PlayerActions();
-    this.name = name;
-    
+
     var current_round = null;
     var match = null;
 
@@ -26,29 +25,35 @@ var DumbAI = function (name) {
         return max;
       }
 
-      current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
-        if(e.getBetter().player_id === id) {
-          let keys = Object.keys(e.getValidActions())
-          let key = keys[ keys.length * Math.random() << 0];
-          let action = e.getValidActions()[key];
-          if(key === "raise") {
-            let maxBet  = getMax(current_round.pot);
-            let aiPot = current_round.pot[id];
-            let amt_to_raise = (maxBet-aiPot)+1;
-            if(amt_to_raise <= match.getPlayerBudget(e.getBetter().player_id) - (maxBet - aiPot)) {
-              action((maxBet-aiPot)+1);
-            } else {
-              // if bet is too high, call/check
-              if(e.getValidActions()['call']) {
-                e.getValidActions()['call']();
-              } else {
-                e.getValidActions()['check']();
-              }
+	current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
+	    console.log("BSE handler for DumbAI (" + match.players[id].getName() + ")");
+	    
+            if(e.getBetter().player_id === id) {
+		let valid_actions = e.getValidActions();
+		let action = valid_actions[ valid_actions.length * Math.random() << 0];
+		if(action === "raise") {
+		    let maxBet  = getMax(current_round.pot);
+		    let aiPot = current_round.pot[id];
+		    let amt_to_call = (maxBet-aiPot);
+
+		    if (amt_to_call > match.getPlayerBudget(id)) {
+			// Can't raise, can only call or check depending on which
+			// is available to us.
+
+			if (valid_actions.includes('call')) {
+			    current_round.call();
+			} else {
+			    current_round.check();
+			}
+			return;
+		    }
+		    
+		    let amt_to_raise = Math.floor(Math.random() * (match.getPlayerBudget(id) - amt_to_call) + 1);
+		    current_round.raise(amt_to_raise);
+		} else {
+		    current_round[action]();
+		}
             }
-          } else {
-            action(e.getBetter());
-          }
-        }
-      });
+	});
     }
-  }
+}
