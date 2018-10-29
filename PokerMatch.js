@@ -48,7 +48,10 @@ var PokerMatch = function (players, settings) {
 
   var setup_next_round = function (e) {
     if(roundCount % that.settings.blindIncreaseFrequency === 0) {
-      smallBlind = smallBlind * 2;
+      smallBlind = smallBlind + 1;
+      if(smallBlind * 2  > 40) {
+        smallBlind = 20;
+      }
     }
 
     var activePlayers = [];
