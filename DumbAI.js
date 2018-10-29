@@ -26,8 +26,6 @@ var DumbAI = function (name) {
       }
 
 	current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
-	    console.log("BSE handler for DumbAI (" + match.players[id].getName() + ")");
-	    
             if(e.getBetter().player_id === id) {
 		let valid_actions = e.getValidActions();
 		let action = valid_actions[ valid_actions.length * Math.random() << 0];

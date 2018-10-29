@@ -212,6 +212,26 @@ var RoundOfPoker = function (smallBlind, dealer, players) {
     return that.players[player_id];
   }
 
+    this.isFolded = function(player_id) {
+	for (let i=0; i < activePlayerIds.length; i++) {
+	    if (activePlayerIds[i] == player_id) {
+		return false;
+	    }
+	}
+	return true;
+    }
+
+    this.amountToCall = function() {
+	let max = 0;
+        for(var player in this.pot ) {
+            if(this.pot[player] > max) {
+		max = this.pot[player];
+            }
+        }
+	let alreadyIn = this.pot[current_better.player_id];
+	return (max - alreadyIn);
+    }
+	
   var endRoundPlayersHaveNoMoney = function () {
     switch(current_turn) {
       case 1:

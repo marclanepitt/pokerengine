@@ -20,16 +20,12 @@ var Player = function (name) {
     var current_round = null;
     var player_id = null;
 
-    // Shouldn't need this if we use arrow functions.
-    var that = this;
-
-
     // This appends a message to the message log of the
     // text-based interface. Your interface shouldn't need
     // this because everything will be graphical instead.
     
     this.appendMessage = function (message) {
-	$('#messageLog').append('<p>' + message + '</p>');
+	$('#messageLog').append('<div class="mesg">' + message + '</div>');
 	$('#messageLog').animate({scrollTop:$('#messageLog')[0].scrollHeight});
     }
     
@@ -59,16 +55,16 @@ var Player = function (name) {
 	player_id = id;
 	let allFlippedCards = [];
 
-	current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, function (e) {
-	    that.appendMessage("ROUND STARTED");
-	    that.appendMessage("Current dealer: " + e.getDealer().getName() + ". SB = " + e.getSmallBlind() + "; BB = "  + e.getBigBlind());
+	current_round.registerEventHandler(Poker.ROUND_STARTED_EVENT, (e) => {
+	    this.appendMessage("ROUND STARTED");
+	    this.appendMessage("Current dealer: " + e.getDealer().getName() + ". SB = " + e.getSmallBlind() + "; BB = "  + e.getBigBlind());
 	});
 
-	current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, function (e) {
-	    that.appendMessage("Round Ended, " + e.getWinner().getName() + " won $" + e.getWinnings() + " with " + e.getType());
+	current_round.registerEventHandler(Poker.ROUND_ENDED_EVENT, (e) => {
+	    this.appendMessage("Round Ended, " + e.getWinner().getName() + " won $" + e.getWinnings() + " with " + e.getType());
 	});
 
-	current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, function (e) {
+	current_round.registerEventHandler(Poker.TURN_STARTED_EVENT, (e) => {
 	    
 	    let cards_flipped_this_turn = e.getFlippedCards();
 	    for(let i = 0; i < cards_flipped_this_turn.length; i++) {
@@ -86,11 +82,10 @@ var Player = function (name) {
 		}
 		turn_message += "</ul>";
 	    }
-	    that.appendMessage(turn_message);
+	    this.appendMessage(turn_message);
 	});
 
-	// Check for all commands here
-	current_round.registerEventHandler(Poker.BET_START_EVENT, function(e) {
+	current_round.registerEventHandler(Poker.BET_START_EVENT, (e) => {
 	    // Checking player_id from event object against id saved when round started
 	    // event was processed is how we know it is this player's turn.
 	    if(e.getBetter().player_id === id) {
@@ -101,32 +96,33 @@ var Player = function (name) {
 		    message += "<li>" + valid_actions[i] + "</li>";
 		}
 		message += "</ul>";
-		that.appendMessage(message);
+		message += "Amount to call: " + current_round.amountToCall();
+		this.appendMessage(message);
 	    } else {
-		that.appendMessage(e.getBetter().getName() + "'s turn - (budget: "+match.getPlayerBudget(e.getBetter().player_id)+")");
+		this.appendMessage(e.getBetter().getName() + "'s turn - (budget: "+match.getPlayerBudget(e.getBetter().player_id)+")");
 	    }
 	});
 
-	current_round.registerEventHandler(Poker.BET_ENDED_EVENT, function(e) {
+	current_round.registerEventHandler(Poker.BET_ENDED_EVENT, (e) => {
 	    if(e.getBetAmount() > 0) {
-		that.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType() + " $" + e.getBetAmount());
+		this.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType() + " $" + e.getBetAmount());
 	    } else {
-		that.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType());
+		this.appendMessage(e.getPreviousBetter().getName() + " action: " + e.getBetType());
 	    }
 
 	    $(".player-"+e.getPreviousBetter().getName()+e.getPreviousBetter().player_id+" .money").text(match.getPlayerBudget(e.getPreviousBetter().player_id));
 	});
 
-	current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, function (e) {
-	    that.appendMessage("Turn ended");
+	current_round.registerEventHandler(Poker.TURN_ENDED_EVENT, (e) => {
+	    this.appendMessage("Turn ended");
 	});
 
-	current_round.registerEventHandler(Poker.GAME_OVER_EVENT, function(e) {
-	    that.appendMessage(e.getWinner().getName() + " has won the entire game!");
+	current_round.registerEventHandler(Poker.GAME_OVER_EVENT, (e) => {
+	    this.appendMessage(e.getWinner().getName() + " has won the entire game!");
 	});
 
-	current_round.registerEventHandler(Poker.ERROR, function (e) {
-	    that.appendMessage("Error: " + e.getError());
+	current_round.registerEventHandler(Poker.ERROR, (e) => {
+	    this.appendMessage("Error: " + e.getError());
 	    console.log(e.getError());
 	});
     }
@@ -135,7 +131,7 @@ var Player = function (name) {
     // not need this but should be mouse/button driven (possibly with an input
     // for bet amounts).
     
-    let handleTextInput =  function(event, isClick) {
+    let handleTextInput =  (event, isClick) => {
 	if(event.keyCode === 13 || isClick) {
 	    let input = $("#pokerConsole").val();
 	    if(input.substring(0,5) === "raise") {
@@ -157,18 +153,21 @@ var Player = function (name) {
 		    if(i === 0) { playerHand += '<br />'; }
 		}
         
-		that.appendMessage(playerHand);
+		this.appendMessage(playerHand);
 	    } else if(input === "pot") {
 		let totalPot = 0;
 		let pot_breakdown_mesg = "<ul>";
 
 		for(var player in current_round.pot) {
 		    totalPot += current_round.pot[player];
-		    pot_breakdown_mesg += "<li>" + current_round.players[player].getName() + ": " + current_round.pot[player] + "</li>";
+		    pot_breakdown_mesg += "<li>" + current_round.players[player].getName() +
+			(current_round.isFolded(player) ? "[folded]" : "") +
+			": " + current_round.pot[player] + "</li>";
 		}
 		pot_breakdown_mesg += "</ul>";
 
-		that.appendMessage("Current pot: " + totalPot + pot_breakdown_mesg);
+		this.appendMessage("Current pot: " + totalPot + "<br>"
+				   + pot_breakdown_mesg);
 		
 	    } else if(input === "budgets") {
 		let message = '<b>Budgets:</b>'
@@ -176,11 +175,11 @@ var Player = function (name) {
 		    message += '<br />';
 		    message += current_round.players[i].getName() + ': ' + match.getPlayerBudget(current_round.players[i].player_id);
 		}
-		that.appendMessage(message);
+		this.appendMessage(message);
 	    } else if(input === 'help') {
-		that.appendMessage('Actions: raise (int), call, fold, check, hand, pot, budgets, help');
+		this.appendMessage('Actions: raise (int), call, fold, check, hand, pot, budgets, help');
 	    } else {
-		that.appendMessage("Invalid command");
+		this.appendMessage("Invalid command");
 	    }
 	    $("#pokerConsole").val("");
 	}
